@@ -1,92 +1,116 @@
 
 
-# Simplified Employee Onboarding: Admin-Driven Account Creation
+# Fix: Employees Not Visible to Admin (and Projects, HR pages broken)
 
-## Current Problems
+## Root Cause Found
 
-1. **Admin adds employee** -- record saves to DB but doesn't always show in HR UI (RLS timing/query issues)
-2. **Self-signup leads to dead end** -- new user sees "Pending Approval" with no way for admin to approve
-3. **Two disconnected flows** -- adding an employee record and inviting are separate steps that don't link together
+The Postgres error logs show hundreds of **"permission denied for table users"** errors. This is caused by one RLS policy on the `employees` table:
 
-## New Approach: Admin Creates Everything
-
-The admin adds an employee, picks their access role, and the system automatically creates their login account and sends them a "set your password" email. No self-signup needed.
-
-```text
-Admin adds employee (name, email, role)
-         |
-         v
-Backend function creates auth account
-         |
-         v
-Employee receives "Set Password" email
-         |
-         v
-Employee sets password and signs in
-         |
-         v
-System routes them based on their role
+```sql
+-- This policy has a subquery to auth.users, which the authenticated role CANNOT access
+"Employees can view own employee record"
+USING (
+  user_id = auth.uid() 
+  OR email = (SELECT users.email FROM auth.users WHERE users.id = auth.uid())::text
+)
 ```
 
-## What Changes
+The `authenticated` database role does not have SELECT permission on `auth.users`. So every time ANY query touches the `employees` table, PostgreSQL tries to evaluate this subquery and fails with "permission denied." This breaks:
 
-### 1. New backend function: `create-employee-account`
+- **HR page**: Direct query to employees fails, plus leave_requests, reviews, and documents all join with employees
+- **Projects page**: The query `select('*, deals(title), employees(name)')` joins employees via manager_id FK
+- **Slow loading**: The repeated permission errors cause timeouts and retries
 
-An edge function that the admin calls when adding an employee. It:
-- Creates the auth user via admin API (with a random password)
-- Inserts a row into `user_roles` with the selected role
-- Sends a password reset email so the employee can set their own password
-- Returns the new user ID to link to the employee record
+Products, contacts, and basic assets work because they don't touch the employees table.
 
-### 2. Update Employee Form
+## Additional Issue: Employee Self-Access
 
-- Add a required **email** field
-- Add an **Access Role** dropdown (Employee, Procurement Manager, HR Manager, Project Manager, Finance Manager)
-- When saving a new employee, call the edge function instead of just inserting into `employees` table
+The edge function creates employees with `user_id = admin's ID` (so admin can manage them via RLS). But the employee's own auth user ID is never stored on the employee record, so employees can only find their record by email match -- which is what the broken policy was trying to do.
 
-### 3. Update `useUpsertEmployee` hook
+## Fix Plan
 
-- For new employees: call the `create-employee-account` edge function, which handles auth user + role + employee record creation all in one
-- For edits: keep the current direct update
+### Step 1: Database Migration
 
-### 4. Remove self-signup from Auth page
+a) **Create a SECURITY DEFINER function** to safely get the current user's email without directly querying auth.users:
 
-- Auth page becomes **login + forgot password only**
-- Remove the "Sign Up" option since all accounts are admin-created
-- Keep the "Pending Approval" screen as a fallback safety net (in case someone somehow signs up without being added)
+```sql
+CREATE OR REPLACE FUNCTION public.get_auth_email()
+RETURNS text
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT email FROM auth.users WHERE id = auth.uid()
+$$;
+```
 
-### 5. Database: add `app_role` column to employees
+b) **Drop and recreate the broken RLS policy** on employees:
 
-- Add `app_role` column (type `app_role` enum, nullable) to the `employees` table
-- This stores which system access level the employee has
+```sql
+DROP POLICY "Employees can view own employee record" ON public.employees;
 
-### 6. Clean up invitation system
+CREATE POLICY "Employees can view own employee record"
+ON public.employees FOR SELECT
+USING (
+  user_id = auth.uid() 
+  OR email = public.get_auth_email()
+);
+```
 
-- Keep the invitations table/UI as optional (for cases where admin wants to pre-authorize an email before adding the full employee record)
-- The primary flow is now: admin adds employee -> account created automatically
+This gives the same behavior (employees can find their record by email) but without the permission error.
+
+### Step 2: Update Edge Function
+
+Store the new auth user's ID on the employee record so we have a direct link. Update `create-employee-account` to set a link between the employee record and their auth account, enabling future RLS improvements.
+
+Currently the edge function does:
+```js
+user_id: caller.id  // admin's ID
+```
+
+After the employee's auth account is created, also store their user ID by updating the employee row.
+
+### Step 3: No Frontend Changes Needed
+
+The queries and UI code are all correct. Once the RLS policy is fixed, employees and projects will render immediately.
+
+---
 
 ## Technical Details
 
-### Files to create
-| File | Purpose |
-|------|---------|
-| `supabase/functions/create-employee-account/index.ts` | Edge function: creates auth user, assigns role, creates employee record |
+### Database Migration SQL
 
-### Files to modify
+```sql
+-- 1. Create helper function (SECURITY DEFINER bypasses auth.users restriction)
+CREATE OR REPLACE FUNCTION public.get_auth_email()
+RETURNS text
+LANGUAGE sql
+STABLE SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT email FROM auth.users WHERE id = auth.uid()
+$$;
+
+-- 2. Fix the broken employees policy
+DROP POLICY IF EXISTS "Employees can view own employee record" ON public.employees;
+CREATE POLICY "Employees can view own employee record"
+ON public.employees FOR SELECT
+USING (user_id = auth.uid() OR email = public.get_auth_email());
+```
+
+### Files to Modify
+
 | File | Change |
 |------|--------|
-| `src/components/forms/EmployeeFormDialog.tsx` | Add access role dropdown, make email required for new employees |
-| `src/hooks/useCrmData.ts` | Update `useUpsertEmployee` to call edge function for new employees |
-| `src/pages/Auth.tsx` | Remove signup mode, keep login + forgot password only |
+| Database migration (new) | Create `get_auth_email()` function and fix RLS policy |
 
-### Database migration
-- Add `app_role` column to `employees` table (type `app_role`, nullable, default null)
+### What This Fixes
 
-### Edge function logic (create-employee-account)
-1. Verify caller is admin (check `user_roles`)
-2. Create auth user with `supabase.auth.admin.createUser({ email, email_confirm: true })`
-3. Insert into `user_roles` with selected role
-4. Insert into `employees` table with all provided fields + new user_id
-5. Send password reset email via `supabase.auth.admin.generateLink({ type: 'recovery', email })`
-6. Return success with employee ID
+- Admin can see all employees they created (via `user_id = auth.uid()`)
+- Employees can see their own record (via email match using safe function)
+- HR page loads correctly (all sub-queries stop erroring)
+- Projects page loads correctly (employees join stops erroring)
+- Performance reviews employee dropdown populates correctly
+- Documents tab works for admin
 
