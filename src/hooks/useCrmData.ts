@@ -264,14 +264,27 @@ export function useUpsertEmployee() {
   const qc = useQueryClient();
   const { user } = useAuth();
   return useMutation({
-    mutationFn: async (emp: { id?: string; name: string; role?: string; department?: string; start_date?: string; leave_balance?: number; contact_id?: string | null; email?: string; job_title?: string }) => {
-      const payload = { ...emp, user_id: user!.id };
+    mutationFn: async (emp: { id?: string; name: string; role?: string; department?: string; start_date?: string; leave_balance?: number; contact_id?: string | null; email?: string; job_title?: string; app_role?: string }) => {
       if (emp.id) {
+        // Edit existing employee – direct update
+        const { app_role, ...updateFields } = emp;
+        const payload = { ...updateFields, user_id: user!.id };
         const { error } = await supabase.from('employees').update(payload).eq('id', emp.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from('employees').insert(payload);
-        if (error) throw error;
+        // New employee – call edge function to create auth account + employee record
+        const { data: { session } } = await supabase.auth.getSession();
+        const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-employee-account`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session?.access_token}`,
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify(emp),
+        });
+        const result = await res.json();
+        if (!res.ok) throw new Error(result.error || 'Failed to create employee account');
       }
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['employees'] }); toast.success('Employee saved'); },
