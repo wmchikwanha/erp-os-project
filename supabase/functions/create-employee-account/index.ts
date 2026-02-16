@@ -101,6 +101,9 @@ Deno.serve(async (req) => {
       })
     }
 
+    // Employee accesses their record via email match in RLS (get_auth_email function)
+    // user_id stays as admin's ID so admin can manage via "Users can CRUD own employees" policy
+
     // 4. Send password reset email so employee can set their own password
     const { error: linkError } = await adminClient.auth.admin.generateLink({
       type: 'recovery',
