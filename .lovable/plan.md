@@ -1,128 +1,92 @@
 
 
-# Fix Plan: Role System, Data Rendering, and Access Control
+# Simplified Employee Onboarding: Admin-Driven Account Creation
 
-## Problems Identified
+## Current Problems
 
-1. **Missing triggers**: Functions `handle_new_user` and `handle_user_role_on_signup` exist but have no triggers on `auth.users`. Profiles and roles are never auto-created.
-2. **Empty `user_roles`**: The admin (wmchikwanha71@gmail.com) has no role, so all `has_role(auth.uid(), 'admin')` RLS checks fail -- blocking invitations, documents, and reviews.
-3. **Employee/Project rendering**: These likely work for basic SELECT but related HR sub-features (reviews dropdown, documents) silently return empty because of failed admin RLS checks.
-4. **New signups default to admin UI**: `App.tsx` treats any user without role='employee' as admin.
-5. **No granular roles**: Only 'admin' and 'employee' exist. No way to give an employee access to a specific department tab.
+1. **Admin adds employee** -- record saves to DB but doesn't always show in HR UI (RLS timing/query issues)
+2. **Self-signup leads to dead end** -- new user sees "Pending Approval" with no way for admin to approve
+3. **Two disconnected flows** -- adding an employee record and inviting are separate steps that don't link together
 
----
+## New Approach: Admin Creates Everything
 
-## Step 1: Database Migration -- Fix Triggers, Roles, and Bootstrap
+The admin adds an employee, picks their access role, and the system automatically creates their login account and sends them a "set your password" email. No self-signup needed.
 
-**Create migration with:**
-
-a) **Attach missing triggers to `auth.users`**:
-   - `handle_new_user` -> creates profile on signup
-   - `handle_user_role_on_signup` -> assigns role if invitation exists
-
-b) **Insert admin role** for existing user (wmchikwanha71@gmail.com, ID `abee637b-780b-44cd-97ba-9847beac6b50`):
-   ```sql
-   INSERT INTO user_roles (user_id, role) 
-   VALUES ('abee637b-780b-44cd-97ba-9847beac6b50', 'admin')
-   ON CONFLICT DO NOTHING;
-   ```
-
-c) **Create missing profile** for the admin user.
-
-d) **Expand `app_role` enum** to include department-level roles:
-   - `procurement_manager`
-   - `hr_manager`
-   - `project_manager`
-   - `finance_manager`
-
-e) **Add `department_access` column** to `employees` table (text array) to store which sections an employee can access.
-
-f) **Create a first-admin bootstrap trigger**: If `user_roles` is empty when a new user signs up, auto-assign them as admin.
-
----
-
-## Step 2: Update `useRole` Hook
-
-- Return the full role object (not just 'admin'|'employee')
-- Add a `useDepartmentAccess` hook that returns which sections the logged-in employee can access based on their role
-- Support the new enum values
-
----
-
-## Step 3: Fix `App.tsx` Routing
-
-- When `role` is null (no role assigned), show a "pending approval" screen instead of admin UI
-- For `admin` role: show all routes (current behavior)
-- For `employee` role: show base employee portal
-- For department roles (e.g. `procurement_manager`): show employee portal plus the specific department route (e.g. `/procurement`)
-
-Updated routing logic:
 ```text
-role === 'admin'                -> all routes
-role === 'procurement_manager'  -> employee portal + /procurement
-role === 'hr_manager'           -> employee portal + /hr (read-only)
-role === 'project_manager'      -> employee portal + /projects
-role === 'finance_manager'      -> employee portal + /invoices
-role === 'employee'             -> employee portal only
-role === null                   -> "Pending approval" screen
+Admin adds employee (name, email, role)
+         |
+         v
+Backend function creates auth account
+         |
+         v
+Employee receives "Set Password" email
+         |
+         v
+Employee sets password and signs in
+         |
+         v
+System routes them based on their role
 ```
 
----
+## What Changes
 
-## Step 4: Update `AppLayout.tsx` Navigation
+### 1. New backend function: `create-employee-account`
 
-- Build nav items dynamically based on role
-- Department managers see their base employee portal tab plus their department tab
-- Admins see everything
+An edge function that the admin calls when adding an employee. It:
+- Creates the auth user via admin API (with a random password)
+- Inserts a row into `user_roles` with the selected role
+- Sends a password reset email so the employee can set their own password
+- Returns the new user ID to link to the employee record
 
----
+### 2. Update Employee Form
 
-## Step 5: Update `InviteEmployeeDialog`
+- Add a required **email** field
+- Add an **Access Role** dropdown (Employee, Procurement Manager, HR Manager, Project Manager, Finance Manager)
+- When saving a new employee, call the edge function instead of just inserting into `employees` table
 
-- Add a role selector dropdown so admins can choose which role to assign to the invited employee
-- Pass the selected role to `useCreateInvitation`
+### 3. Update `useUpsertEmployee` hook
 
----
+- For new employees: call the `create-employee-account` edge function, which handles auth user + role + employee record creation all in one
+- For edits: keep the current direct update
 
-## Step 6: Update `useCreateInvitation` Hook
+### 4. Remove self-signup from Auth page
 
-- Accept a `role` parameter instead of hardcoding `'employee'`
-- Pass it to the invitations insert
+- Auth page becomes **login + forgot password only**
+- Remove the "Sign Up" option since all accounts are admin-created
+- Keep the "Pending Approval" screen as a fallback safety net (in case someone somehow signs up without being added)
 
----
+### 5. Database: add `app_role` column to employees
 
-## Step 7: Update `handle_user_role_on_signup` Function
+- Add `app_role` column (type `app_role` enum, nullable) to the `employees` table
+- This stores which system access level the employee has
 
-- Already reads role from invitations table, so it will automatically assign the correct role when the new enum values are used
+### 6. Clean up invitation system
 
----
-
-## Step 8: Fix RLS for Department Roles
-
-Add SELECT policies on relevant tables so department managers can read their section's data:
-- `procurement_manager` can SELECT on `purchase_orders`, `purchase_order_items`, `products`, `assets`
-- `hr_manager` can SELECT on `employees`, `leave_requests`, `performance_reviews`, `employee_documents`
-- `project_manager` can SELECT on `projects`
-- `finance_manager` can SELECT on `invoices`, `payments`
-
----
+- Keep the invitations table/UI as optional (for cases where admin wants to pre-authorize an email before adding the full employee record)
+- The primary flow is now: admin adds employee -> account created automatically
 
 ## Technical Details
 
-### Files to Modify
+### Files to create
+| File | Purpose |
+|------|---------|
+| `supabase/functions/create-employee-account/index.ts` | Edge function: creates auth user, assigns role, creates employee record |
+
+### Files to modify
 | File | Change |
 |------|--------|
-| `src/hooks/useRole.ts` | Expand AppRole type, add department access helper |
-| `src/App.tsx` | Role-based routing with department access, pending screen |
-| `src/components/AppLayout.tsx` | Dynamic nav items per role |
-| `src/components/forms/InviteEmployeeDialog.tsx` | Add role selector |
-| `src/hooks/useCrmData.ts` | Update `useCreateInvitation` to accept role param |
-| `src/pages/EmployeePortal.tsx` | Minor updates for department managers |
+| `src/components/forms/EmployeeFormDialog.tsx` | Add access role dropdown, make email required for new employees |
+| `src/hooks/useCrmData.ts` | Update `useUpsertEmployee` to call edge function for new employees |
+| `src/pages/Auth.tsx` | Remove signup mode, keep login + forgot password only |
 
-### New Migration SQL
-- Attach 2 triggers to `auth.users`
-- Insert admin role + profile for existing user
-- Expand `app_role` enum with 4 new values
-- Add RLS policies for department roles
-- Add first-admin bootstrap function/trigger
+### Database migration
+- Add `app_role` column to `employees` table (type `app_role`, nullable, default null)
+
+### Edge function logic (create-employee-account)
+1. Verify caller is admin (check `user_roles`)
+2. Create auth user with `supabase.auth.admin.createUser({ email, email_confirm: true })`
+3. Insert into `user_roles` with selected role
+4. Insert into `employees` table with all provided fields + new user_id
+5. Send password reset email via `supabase.auth.admin.generateLink({ type: 'recovery', email })`
+6. Return success with employee ID
 
