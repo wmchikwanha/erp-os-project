@@ -270,7 +270,7 @@ export default function HRPage() {
       <DeleteConfirmDialog open={!!deleteReviewId} onOpenChange={() => setDeleteReviewId(null)} loading={removeReview.isPending} onConfirm={() => { if (deleteReviewId) removeReview.mutate(deleteReviewId, { onSuccess: () => setDeleteReviewId(null) }); }} title="Delete Review" />
       <DocumentUploadDialog open={docUploadOpen} onOpenChange={setDocUploadOpen} loading={uploadDoc.isPending} onSubmit={(data) => { if (docEmployeeId) uploadDoc.mutate({ employeeId: docEmployeeId, ...data }, { onSuccess: () => setDocUploadOpen(false) }); }} />
       <DeleteConfirmDialog open={!!deleteDocData} onOpenChange={() => setDeleteDocData(null)} loading={removeDoc.isPending} onConfirm={() => { if (deleteDocData) removeDoc.mutate(deleteDocData, { onSuccess: () => setDeleteDocData(null) }); }} title="Delete Document" />
-      <InviteEmployeeDialog open={inviteOpen} onOpenChange={setInviteOpen} loading={createInvite.isPending} onSubmit={(email) => { createInvite.mutate(email, { onSuccess: () => setInviteOpen(false) }); }} />
+      <InviteEmployeeDialog open={inviteOpen} onOpenChange={setInviteOpen} loading={createInvite.isPending} onSubmit={(email, role) => { createInvite.mutate({ email, role }, { onSuccess: () => setInviteOpen(false) }); }} />
     </div>
   );
 }
