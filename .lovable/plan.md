@@ -1,104 +1,128 @@
 
 
-## Plan: Procurement Workflow, Asset Register, and Projects
+# Fix Plan: Role System, Data Rendering, and Access Control
 
-### Architecture Decision
+## Problems Identified
 
-After reviewing the codebase, here is the recommended module structure that maximizes remixability:
-
-**Group 1 -- Supply Chain** (rename "Products" sidebar item to "Procurement")
-- Tab 1: **Inventory** (existing products catalog, unchanged)
-- Tab 2: **Purchase Orders** (request-to-receipt workflow with approval)
-- Tab 3: **Asset Register** (company assets tracked from procurement or manually added)
-
-**Group 2 -- Revenue** (keep "Deals" and add "Projects" as separate sidebar items)
-- **Deals** stays as-is (sales kanban pipeline)
-- **Projects** (new sidebar item) -- spawned from closed-won deals or created standalone, with milestones and status tracking
-
-This keeps the sidebar clean (replaces "Products" with "Procurement", adds "Projects") and groups logically: procurement is about spending money, deals/projects are about earning it.
-
-### Sidebar Order (updated)
-Dashboard | Contacts | Deals | Projects | Activities | Procurement | Invoices | HR | Reports
+1. **Missing triggers**: Functions `handle_new_user` and `handle_user_role_on_signup` exist but have no triggers on `auth.users`. Profiles and roles are never auto-created.
+2. **Empty `user_roles`**: The admin (wmchikwanha71@gmail.com) has no role, so all `has_role(auth.uid(), 'admin')` RLS checks fail -- blocking invitations, documents, and reviews.
+3. **Employee/Project rendering**: These likely work for basic SELECT but related HR sub-features (reviews dropdown, documents) silently return empty because of failed admin RLS checks.
+4. **New signups default to admin UI**: `App.tsx` treats any user without role='employee' as admin.
+5. **No granular roles**: Only 'admin' and 'employee' exist. No way to give an employee access to a specific department tab.
 
 ---
 
-### 1. Database Changes (new migration)
+## Step 1: Database Migration -- Fix Triggers, Roles, and Bootstrap
 
-**`purchase_orders` table:**
-- id, user_id, supplier_id (links to contacts where type=supplier), po_number, status (draft / submitted / approved / rejected / received), requested_by, approved_by, total_amount, notes, created_at, updated_at
-- Workflow: Draft -> Submitted -> Approved/Rejected -> Received
+**Create migration with:**
 
-**`purchase_order_items` table:**
-- id, po_id (FK to purchase_orders), product_id (FK to products), description, quantity, unit_price, total
+a) **Attach missing triggers to `auth.users`**:
+   - `handle_new_user` -> creates profile on signup
+   - `handle_user_role_on_signup` -> assigns role if invitation exists
 
-**`assets` table:**
-- id, user_id, name, asset_tag, category (Equipment / Vehicle / IT / Furniture / Other), purchase_date, purchase_price, current_value, condition (New / Good / Fair / Poor / Decommissioned), location, assigned_to (employee_id), po_id (optional link to purchase order), notes, created_at, updated_at
+b) **Insert admin role** for existing user (wmchikwanha71@gmail.com, ID `abee637b-780b-44cd-97ba-9847beac6b50`):
+   ```sql
+   INSERT INTO user_roles (user_id, role) 
+   VALUES ('abee637b-780b-44cd-97ba-9847beac6b50', 'admin')
+   ON CONFLICT DO NOTHING;
+   ```
 
-**`projects` table:**
-- id, user_id, deal_id (optional FK to deals), name, description, status (planning / active / on-hold / completed / cancelled), priority (low / medium / high / critical), start_date, end_date, budget, actual_cost, progress (0-100), manager_id (employee_id), created_at, updated_at
+c) **Create missing profile** for the admin user.
 
-RLS: All tables use `auth.uid() = user_id` pattern matching existing tables.
+d) **Expand `app_role` enum** to include department-level roles:
+   - `procurement_manager`
+   - `hr_manager`
+   - `project_manager`
+   - `finance_manager`
 
----
+e) **Add `department_access` column** to `employees` table (text array) to store which sections an employee can access.
 
-### 2. Procurement Page (replaces Products in sidebar)
-
-Three tabs:
-
-**Inventory Tab** -- the existing products table, moved here unchanged.
-
-**Purchase Orders Tab** -- table listing POs with status badges and a kanban-style workflow:
-- "New PO" form: select supplier (from contacts), add line items (from products catalog), auto-calculate total
-- Status progression buttons: Submit for Approval -> Approve/Reject -> Mark Received
-- When marked "Received", optionally auto-update product stock quantities and/or create asset records
-
-**Asset Register Tab** -- table of company assets with:
-- "Add Asset" form: name, tag, category, purchase info, condition, location, assigned employee
-- Filter by category, condition, or assigned employee
-- Link back to originating PO if created from procurement
+f) **Create a first-admin bootstrap trigger**: If `user_roles` is empty when a new user signs up, auto-assign them as admin.
 
 ---
 
-### 3. Projects Page (new sidebar item)
+## Step 2: Update `useRole` Hook
 
-- Card/list view of projects with status, priority, progress bar, and budget vs actual
-- "New Project" form: name, description, link to deal (dropdown of closed-won deals), dates, budget, assigned manager
-- Project detail shows: overview stats, linked deal info, budget tracking
-- Status workflow: Planning -> Active -> Completed (or On-Hold / Cancelled)
+- Return the full role object (not just 'admin'|'employee')
+- Add a `useDepartmentAccess` hook that returns which sections the logged-in employee can access based on their role
+- Support the new enum values
 
 ---
 
-### 4. Files to Create
+## Step 3: Fix `App.tsx` Routing
 
-| File | Purpose |
-|------|---------|
-| `src/pages/Procurement.tsx` | Tabbed page (Inventory, Purchase Orders, Assets) |
-| `src/pages/Projects.tsx` | Projects list and management |
-| `src/components/forms/PurchaseOrderFormDialog.tsx` | PO creation with line items |
-| `src/components/forms/AssetFormDialog.tsx` | Asset register form |
-| `src/components/forms/ProjectFormDialog.tsx` | Project creation/edit form |
+- When `role` is null (no role assigned), show a "pending approval" screen instead of admin UI
+- For `admin` role: show all routes (current behavior)
+- For `employee` role: show base employee portal
+- For department roles (e.g. `procurement_manager`): show employee portal plus the specific department route (e.g. `/procurement`)
 
-### 5. Files to Modify
+Updated routing logic:
+```text
+role === 'admin'                -> all routes
+role === 'procurement_manager'  -> employee portal + /procurement
+role === 'hr_manager'           -> employee portal + /hr (read-only)
+role === 'project_manager'      -> employee portal + /projects
+role === 'finance_manager'      -> employee portal + /invoices
+role === 'employee'             -> employee portal only
+role === null                   -> "Pending approval" screen
+```
 
+---
+
+## Step 4: Update `AppLayout.tsx` Navigation
+
+- Build nav items dynamically based on role
+- Department managers see their base employee portal tab plus their department tab
+- Admins see everything
+
+---
+
+## Step 5: Update `InviteEmployeeDialog`
+
+- Add a role selector dropdown so admins can choose which role to assign to the invited employee
+- Pass the selected role to `useCreateInvitation`
+
+---
+
+## Step 6: Update `useCreateInvitation` Hook
+
+- Accept a `role` parameter instead of hardcoding `'employee'`
+- Pass it to the invitations insert
+
+---
+
+## Step 7: Update `handle_user_role_on_signup` Function
+
+- Already reads role from invitations table, so it will automatically assign the correct role when the new enum values are used
+
+---
+
+## Step 8: Fix RLS for Department Roles
+
+Add SELECT policies on relevant tables so department managers can read their section's data:
+- `procurement_manager` can SELECT on `purchase_orders`, `purchase_order_items`, `products`, `assets`
+- `hr_manager` can SELECT on `employees`, `leave_requests`, `performance_reviews`, `employee_documents`
+- `project_manager` can SELECT on `projects`
+- `finance_manager` can SELECT on `invoices`, `payments`
+
+---
+
+## Technical Details
+
+### Files to Modify
 | File | Change |
 |------|--------|
-| `supabase/migrations/` | New migration for 4 tables + RLS |
-| `src/integrations/supabase/types.ts` | Auto-updated |
-| `src/types/crm.ts` | Add PurchaseOrder, Asset, Project interfaces |
-| `src/hooks/useCrmData.ts` | Add hooks for POs, assets, projects |
-| `src/components/AppLayout.tsx` | Replace "Products" with "Procurement", add "Projects" |
-| `src/App.tsx` | Add /projects and /procurement routes, remove /products |
-| `src/pages/Dashboard.tsx` | Add active projects count KPI |
-| `src/pages/Reports.tsx` | Add procurement/asset summary |
-| `supabase/functions/ask-ai/index.ts` | Include POs, assets, projects in AI context |
+| `src/hooks/useRole.ts` | Expand AppRole type, add department access helper |
+| `src/App.tsx` | Role-based routing with department access, pending screen |
+| `src/components/AppLayout.tsx` | Dynamic nav items per role |
+| `src/components/forms/InviteEmployeeDialog.tsx` | Add role selector |
+| `src/hooks/useCrmData.ts` | Update `useCreateInvitation` to accept role param |
+| `src/pages/EmployeePortal.tsx` | Minor updates for department managers |
 
----
-
-### 6. AI Integration
-
-The ask-ai function will be updated to pull from the new tables so executives can ask things like:
-- "Show me all pending purchase orders awaiting approval"
-- "What assets are assigned to the Engineering department?"
-- "Which projects are over budget?"
-- "Link procurement spend to project budgets"
+### New Migration SQL
+- Attach 2 triggers to `auth.users`
+- Insert admin role + profile for existing user
+- Expand `app_role` enum with 4 new values
+- Add RLS policies for department roles
+- Add first-admin bootstrap function/trigger
 
