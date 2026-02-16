@@ -1,0 +1,169 @@
+import { NavLink, useLocation } from 'react-router-dom';
+import {
+  LayoutDashboard,
+  Users,
+  Handshake,
+  CalendarCheck,
+  Package,
+  FileText,
+  UserCog,
+  BarChart3,
+  Settings,
+  ChevronLeft,
+  Menu,
+  LogOut,
+  Home,
+  FolderKanban,
+} from 'lucide-react';
+import { useState } from 'react';
+import { cn } from '@/lib/utils';
+import { useAuth } from '@/hooks/useAuth';
+import AskAIPanel from '@/components/AskAIPanel';
+
+const adminNavItems = [
+  { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/contacts', icon: Users, label: 'Contacts' },
+  { to: '/deals', icon: Handshake, label: 'Deals' },
+  { to: '/projects', icon: FolderKanban, label: 'Projects' },
+  { to: '/activities', icon: CalendarCheck, label: 'Activities' },
+  { to: '/procurement', icon: Package, label: 'Procurement' },
+  { to: '/invoices', icon: FileText, label: 'Invoices' },
+  { to: '/hr', icon: UserCog, label: 'HR' },
+  { to: '/reports', icon: BarChart3, label: 'Reports' },
+];
+
+const employeeNavItems = [
+  { to: '/', icon: Home, label: 'Dashboard' },
+];
+
+export default function AppLayout({ children, role = 'admin' }: { children: React.ReactNode; role?: 'admin' | 'employee' }) {
+  const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const location = useLocation();
+  const { user, signOut } = useAuth();
+
+  const navItems = role === 'employee' ? employeeNavItems : adminNavItems;
+
+  return (
+    <div className="flex h-screen overflow-hidden bg-background">
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-foreground/20 backdrop-blur-sm lg:hidden"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside
+        className={cn(
+          'fixed lg:static inset-y-0 left-0 z-50 flex flex-col bg-sidebar text-sidebar-foreground transition-all duration-300 ease-in-out',
+          collapsed ? 'w-16' : 'w-60',
+          mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        )}
+      >
+        {/* Logo */}
+        <div className={cn('flex items-center h-16 px-4 border-b border-sidebar-border', collapsed ? 'justify-center' : 'gap-3')}>
+          <div className="w-8 h-8 rounded-md bg-sidebar-primary flex items-center justify-center">
+            <span className="text-sm font-bold text-sidebar-primary-foreground">S</span>
+          </div>
+          {!collapsed && (
+            <div className="animate-fade-in">
+              <h1 className="text-sm font-semibold text-sidebar-accent-foreground">StratedgeOS CRM</h1>
+              <p className="text-[10px] text-sidebar-foreground/60">{role === 'employee' ? 'Employee Portal' : 'Enterprise Suite'}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Nav */}
+        <nav className="flex-1 py-4 px-2 space-y-1 overflow-y-auto">
+          {navItems.map((item) => {
+            const isActive = location.pathname === item.to;
+            return (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                onClick={() => setMobileOpen(false)}
+                className={cn(
+                  'nav-item',
+                  isActive
+                    ? 'nav-item-active'
+                    : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
+                  collapsed && 'justify-center px-2'
+                )}
+              >
+                <item.icon className="w-4 h-4 shrink-0" />
+                {!collapsed && <span className="animate-fade-in">{item.label}</span>}
+              </NavLink>
+            );
+          })}
+        </nav>
+
+        {/* Collapse toggle */}
+        <div className="hidden lg:flex p-3 border-t border-sidebar-border">
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className="nav-item w-full text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground justify-center"
+          >
+            <ChevronLeft className={cn('w-4 h-4 transition-transform', collapsed && 'rotate-180')} />
+          </button>
+        </div>
+
+        {/* Footer */}
+        {!collapsed && (
+          <div className="p-4 border-t border-sidebar-border animate-fade-in">
+            <p className="text-[10px] text-sidebar-foreground/40 text-center">
+              Build · Operate · It's Yours™
+            </p>
+          </div>
+        )}
+      </aside>
+
+      {/* Main content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Top bar */}
+        <header className="h-14 border-b border-border flex items-center justify-between px-4 lg:px-6 bg-card shrink-0">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setMobileOpen(true)}
+              className="lg:hidden p-1.5 rounded-md hover:bg-muted text-muted-foreground"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+            <h2 className="text-sm font-semibold">
+              {navItems.find((n) => n.to === location.pathname)?.label || 'StratedgeOS CRM'}
+            </h2>
+            {role === 'employee' && (
+              <span className="status-badge bg-info/10 text-info text-[10px]">Employee</span>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <button className="p-1.5 rounded-md hover:bg-muted text-muted-foreground">
+              <Settings className="w-4 h-4" />
+            </button>
+            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+              <span className="text-xs font-medium text-primary-foreground">
+                {user?.user_metadata?.full_name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2) || user?.email?.charAt(0).toUpperCase() || '?'}
+              </span>
+            </div>
+            <button
+              onClick={signOut}
+              className="p-1.5 rounded-md hover:bg-muted text-muted-foreground"
+              title="Sign Out"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
+        </header>
+
+        {/* Page content */}
+        <main className="flex-1 overflow-y-auto p-4 lg:p-6">
+          {children}
+        </main>
+      </div>
+
+      {/* AskAI — always present, core feature */}
+      {role === 'admin' && <AskAIPanel />}
+    </div>
+  );
+}
