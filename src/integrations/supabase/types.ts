@@ -293,6 +293,7 @@ export type Database = {
       }
       employees: {
         Row: {
+          app_role: Database["public"]["Enums"]["app_role"] | null
           contact_id: string | null
           created_at: string
           department: string | null
@@ -308,6 +309,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          app_role?: Database["public"]["Enums"]["app_role"] | null
           contact_id?: string | null
           created_at?: string
           department?: string | null
@@ -323,6 +325,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          app_role?: Database["public"]["Enums"]["app_role"] | null
           contact_id?: string | null
           created_at?: string
           department?: string | null
