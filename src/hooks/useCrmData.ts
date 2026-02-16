@@ -460,8 +460,8 @@ export function useCreateInvitation() {
   const qc = useQueryClient();
   const { user } = useAuth();
   return useMutation({
-    mutationFn: async (email: string) => {
-      const { error } = await supabase.from('invitations').insert({ email, role: 'employee', invited_by: user!.id });
+    mutationFn: async ({ email, role = 'employee' }: { email: string; role?: string }) => {
+      const { error } = await supabase.from('invitations').insert({ email, role: role as any, invited_by: user!.id });
       if (error) throw error;
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['invitations'] }); toast.success('Invitation created'); },

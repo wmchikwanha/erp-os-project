@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
-import { useRole } from "@/hooks/useRole";
+import { useRole, isDepartmentManager } from "@/hooks/useRole";
 import AppLayout from "@/components/AppLayout";
 import Dashboard from "./pages/Dashboard";
 import Contacts from "./pages/Contacts";
@@ -20,6 +20,29 @@ import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
+
+function PendingApproval() {
+  const { signOut } = useAuth();
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4">
+      <div className="w-12 h-12 rounded-lg bg-primary flex items-center justify-center">
+        <span className="text-lg font-bold text-primary-foreground">S</span>
+      </div>
+      <h1 className="text-lg font-semibold">Pending Approval</h1>
+      <p className="text-sm text-muted-foreground max-w-sm text-center">
+        Your account is awaiting role assignment by an administrator. Please check back later.
+      </p>
+      <button onClick={signOut} className="text-sm text-primary hover:underline mt-2">Sign Out</button>
+    </div>
+  );
+}
+
+const DEPT_ROUTE_MAP: Record<string, { path: string; element: React.ReactNode }> = {
+  procurement_manager: { path: '/procurement', element: <Procurement /> },
+  hr_manager: { path: '/hr', element: <HRPage /> },
+  project_manager: { path: '/projects', element: <Projects /> },
+  finance_manager: { path: '/invoices', element: <Invoices /> },
+};
 
 function ProtectedRoutes() {
   const { session, loading } = useAuth();
@@ -37,6 +60,24 @@ function ProtectedRoutes() {
 
   if (!session) return <Navigate to="/auth" replace />;
 
+  // No role assigned — pending approval
+  if (!role) return <PendingApproval />;
+
+  // Department managers: employee portal + their department route
+  if (isDepartmentManager(role)) {
+    const dept = DEPT_ROUTE_MAP[role];
+    return (
+      <AppLayout role={role}>
+        <Routes>
+          <Route path="/" element={<EmployeePortal />} />
+          {dept && <Route path={dept.path} element={dept.element} />}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AppLayout>
+    );
+  }
+
+  // Employee: portal only
   if (role === 'employee') {
     return (
       <AppLayout role="employee">
@@ -48,6 +89,7 @@ function ProtectedRoutes() {
     );
   }
 
+  // Admin: everything
   return (
     <AppLayout role="admin">
       <Routes>
