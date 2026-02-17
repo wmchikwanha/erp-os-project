@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { RefreshCw, Eye, EyeOff } from 'lucide-react';
 import type { AppRole } from '@/hooks/useRole';
 
 const ROLE_OPTIONS: { value: AppRole; label: string }[] = [
@@ -13,6 +14,16 @@ const ROLE_OPTIONS: { value: AppRole; label: string }[] = [
   { value: 'project_manager', label: 'Project Manager' },
   { value: 'finance_manager', label: 'Finance Manager' },
 ];
+
+function generatePassword(): string {
+  const chars = 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const symbols = '!@#$%&*';
+  let pw = '';
+  for (let i = 0; i < 10; i++) pw += chars[Math.floor(Math.random() * chars.length)];
+  pw += symbols[Math.floor(Math.random() * symbols.length)];
+  pw += Math.floor(Math.random() * 10);
+  return pw;
+}
 
 interface EmployeeFormProps {
   open: boolean;
@@ -25,8 +36,9 @@ interface EmployeeFormProps {
 export function EmployeeFormDialog({ open, onOpenChange, onSubmit, initialData, loading }: EmployeeFormProps) {
   const [form, setForm] = useState({
     name: '', role: '', department: '', start_date: '', leave_balance: 20,
-    email: '', job_title: '', app_role: 'employee' as AppRole,
+    email: '', job_title: '', app_role: 'employee' as AppRole, password: '',
   });
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (initialData) {
@@ -35,10 +47,12 @@ export function EmployeeFormDialog({ open, onOpenChange, onSubmit, initialData, 
         department: initialData.department ?? '', start_date: initialData.start_date ?? '',
         leave_balance: initialData.leave_balance ?? 20, email: initialData.email ?? '',
         job_title: initialData.job_title ?? '', app_role: initialData.app_role ?? 'employee',
+        password: '',
       });
     } else {
-      setForm({ name: '', role: '', department: '', start_date: '', leave_balance: 20, email: '', job_title: '', app_role: 'employee' });
+      setForm({ name: '', role: '', department: '', start_date: '', leave_balance: 20, email: '', job_title: '', app_role: 'employee', password: generatePassword() });
     }
+    setShowPassword(false);
   }, [initialData, open]);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -73,6 +87,30 @@ export function EmployeeFormDialog({ open, onOpenChange, onSubmit, initialData, 
               </Select>
             </div>
           </div>
+          {isNew && (
+            <div>
+              <Label>Initial Password *</Label>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Input
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    minLength={6}
+                    value={form.password}
+                    onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
+                    placeholder="Min 6 characters"
+                    className="pr-10"
+                  />
+                  <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-10 w-10" onClick={() => setShowPassword(!showPassword)}>
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </Button>
+                </div>
+                <Button type="button" variant="outline" size="icon" onClick={() => setForm(f => ({ ...f, password: generatePassword() }))} title="Generate password">
+                  <RefreshCw className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-3">
             <div><Label>Job Title</Label><Input value={form.job_title} onChange={e => setForm(f => ({ ...f, job_title: e.target.value }))} placeholder="e.g. HR Manager, Supervisor" /></div>
             <div><Label>Department</Label><Input value={form.department} onChange={e => setForm(f => ({ ...f, department: e.target.value }))} /></div>
@@ -85,7 +123,7 @@ export function EmployeeFormDialog({ open, onOpenChange, onSubmit, initialData, 
             <div><Label>Leave Balance</Label><Input type="number" min={0} value={form.leave_balance} onChange={e => setForm(f => ({ ...f, leave_balance: Number(e.target.value) }))} /></div>
           </div>
           {isNew && (
-            <p className="text-xs text-muted-foreground">A login account will be created and the employee will receive a "Set Password" email.</p>
+            <p className="text-xs text-muted-foreground">Share the login credentials with the employee after creation.</p>
           )}
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>

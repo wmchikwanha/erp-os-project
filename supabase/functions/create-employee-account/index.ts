@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json()
-    const { email, name, role, department, job_title, start_date, leave_balance, app_role } = body
+    const { email, name, role, department, job_title, start_date, leave_balance, app_role, password } = body
 
     if (!email || !name) {
       return new Response(JSON.stringify({ error: 'Email and name are required' }), {
@@ -57,13 +57,18 @@ Deno.serve(async (req) => {
       })
     }
 
+    if (!password || password.length < 6) {
+      return new Response(JSON.stringify({ error: 'Password must be at least 6 characters' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
     const selectedRole = app_role || 'employee'
 
-    // 1. Create auth user with a random password (email auto-confirmed)
-    const randomPassword = crypto.randomUUID() + '!Aa1'
+    // 1. Create auth user with admin-provided password (email auto-confirmed)
     const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
       email,
-      password: randomPassword,
+      password,
       email_confirm: true,
       user_metadata: { full_name: name },
     })
@@ -104,22 +109,12 @@ Deno.serve(async (req) => {
     // Employee accesses their record via email match in RLS (get_auth_email function)
     // user_id stays as admin's ID so admin can manage via "Users can CRUD own employees" policy
 
-    // 4. Send password reset email so employee can set their own password
-    const { error: linkError } = await adminClient.auth.admin.generateLink({
-      type: 'recovery',
-      email,
-    })
-
-    if (linkError) {
-      console.error('Failed to generate recovery link:', linkError.message)
-      // Non-fatal - account is created, admin can manually trigger reset
-    }
-
     return new Response(JSON.stringify({
       success: true,
       employee_id: employee.id,
       user_id: newUserId,
-      message: `Account created for ${email}. A password reset email has been sent.`,
+      email,
+      message: `Account created for ${email}. Share the login credentials with the employee.`,
     }), {
       status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })

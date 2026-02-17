@@ -4,16 +4,15 @@ import {
   useLeaveRequests, useUpdateLeaveStatus,
   usePerformanceReviews, useUpsertReview, useDeleteReview,
   useEmployeeDocuments, useUploadDocument, useDeleteDocument,
-  useInvitations, useCreateInvitation,
 } from '@/hooks/useCrmData';
 import { cn } from '@/lib/utils';
-import { Check, X, Clock, Plus, Pencil, Trash2, Star, FileText, Mail, Download } from 'lucide-react';
+import { Check, X, Clock, Plus, Pencil, Trash2, Star, FileText, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EmployeeFormDialog } from '@/components/forms/EmployeeFormDialog';
 import { DeleteConfirmDialog } from '@/components/forms/DeleteConfirmDialog';
 import { ReviewFormDialog } from '@/components/forms/ReviewFormDialog';
 import { DocumentUploadDialog } from '@/components/forms/DocumentUploadDialog';
-import { InviteEmployeeDialog } from '@/components/forms/InviteEmployeeDialog';
+import { CredentialsDialog } from '@/components/forms/CredentialsDialog';
 import { supabase } from '@/integrations/supabase/client';
 
 const leaveStatusIcon: Record<string, any> = { pending: Clock, approved: Check, rejected: X };
@@ -23,14 +22,13 @@ const leaveStatusStyle: Record<string, string> = {
   rejected: 'bg-destructive/10 text-destructive',
 };
 
-const tabs = ['Directory', 'Leave Requests', 'Reviews', 'Documents', 'Invitations'] as const;
+const tabs = ['Directory', 'Leave Requests', 'Reviews', 'Documents'] as const;
 
 export default function HRPage() {
   const { data: employees = [], isLoading: loadingEmp } = useEmployees();
   const { data: leaveRequests = [], isLoading: loadingLR } = useLeaveRequests();
   const { data: reviews = [], isLoading: loadingRev } = usePerformanceReviews();
   const { data: documents = [], isLoading: loadingDoc } = useEmployeeDocuments();
-  const { data: invitations = [], isLoading: loadingInv } = useInvitations();
 
   const upsertEmp = useUpsertEmployee();
   const removeEmp = useDeleteEmployee();
@@ -39,7 +37,6 @@ export default function HRPage() {
   const removeReview = useDeleteReview();
   const uploadDoc = useUploadDocument();
   const removeDoc = useDeleteDocument();
-  const createInvite = useCreateInvitation();
 
   const [activeTab, setActiveTab] = useState<typeof tabs[number]>('Directory');
   const [formOpen, setFormOpen] = useState(false);
@@ -51,14 +48,26 @@ export default function HRPage() {
   const [docUploadOpen, setDocUploadOpen] = useState(false);
   const [docEmployeeId, setDocEmployeeId] = useState<string | null>(null);
   const [deleteDocData, setDeleteDocData] = useState<{ id: string; filePath: string } | null>(null);
-  const [inviteOpen, setInviteOpen] = useState(false);
+  const [credentialsData, setCredentialsData] = useState<{ email: string; password: string } | null>(null);
 
-  const loading = loadingEmp || loadingLR || loadingRev || loadingDoc || loadingInv;
+  const loading = loadingEmp || loadingLR || loadingRev || loadingDoc;
   if (loading) return <div className="py-12 text-center text-muted-foreground text-sm">Loading HR data...</div>;
 
   const handleDownload = async (filePath: string) => {
     const { data } = await supabase.storage.from('employee-documents').createSignedUrl(filePath, 60);
     if (data?.signedUrl) window.open(data.signedUrl, '_blank');
+  };
+
+  const handleEmployeeSubmit = (data: any) => {
+    const password = data.password;
+    upsertEmp.mutate(data, {
+      onSuccess: (result: any) => {
+        setFormOpen(false);
+        if (result?.isNew && result.email && password) {
+          setCredentialsData({ email: result.email, password });
+        }
+      },
+    });
   };
 
   return (
@@ -238,39 +247,14 @@ export default function HRPage() {
         </div>
       )}
 
-      {/* Invitations Tab */}
-      {activeTab === 'Invitations' && (
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold">Employee Invitations</h3>
-            <Button size="sm" onClick={() => setInviteOpen(true)}><Mail className="w-4 h-4 mr-1" />Invite Employee</Button>
-          </div>
-          <div className="bg-card border border-border rounded-lg divide-y divide-border">
-            {invitations.map((inv: any) => (
-              <div key={inv.id} className="px-5 py-4 flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium">{inv.email}</p>
-                  <p className="text-xs text-muted-foreground">Invited {new Date(inv.created_at).toLocaleDateString()}</p>
-                </div>
-                <span className={cn('status-badge', inv.accepted_at ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning')}>
-                  {inv.accepted_at ? 'Accepted' : 'Pending'}
-                </span>
-              </div>
-            ))}
-            {invitations.length === 0 && <div className="py-8 text-center text-muted-foreground text-sm">No invitations sent yet</div>}
-          </div>
-          <p className="text-xs text-muted-foreground mt-3">Invited employees will be assigned the "employee" role when they sign up with the invited email address.</p>
-        </div>
-      )}
-
       {/* Dialogs */}
-      <EmployeeFormDialog open={formOpen} onOpenChange={setFormOpen} initialData={editItem} loading={upsertEmp.isPending} onSubmit={(data) => { upsertEmp.mutate(data, { onSuccess: () => setFormOpen(false) }); }} />
+      <EmployeeFormDialog open={formOpen} onOpenChange={setFormOpen} initialData={editItem} loading={upsertEmp.isPending} onSubmit={handleEmployeeSubmit} />
       <DeleteConfirmDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)} loading={removeEmp.isPending} onConfirm={() => { if (deleteId) removeEmp.mutate(deleteId, { onSuccess: () => setDeleteId(null) }); }} title="Delete Employee" />
       <ReviewFormDialog open={reviewFormOpen} onOpenChange={setReviewFormOpen} initialData={editReview} employees={employees.map(e => ({ id: e.id, name: e.name }))} loading={upsertReview.isPending} onSubmit={(data) => { upsertReview.mutate(data, { onSuccess: () => setReviewFormOpen(false) }); }} />
       <DeleteConfirmDialog open={!!deleteReviewId} onOpenChange={() => setDeleteReviewId(null)} loading={removeReview.isPending} onConfirm={() => { if (deleteReviewId) removeReview.mutate(deleteReviewId, { onSuccess: () => setDeleteReviewId(null) }); }} title="Delete Review" />
       <DocumentUploadDialog open={docUploadOpen} onOpenChange={setDocUploadOpen} loading={uploadDoc.isPending} onSubmit={(data) => { if (docEmployeeId) uploadDoc.mutate({ employeeId: docEmployeeId, ...data }, { onSuccess: () => setDocUploadOpen(false) }); }} />
       <DeleteConfirmDialog open={!!deleteDocData} onOpenChange={() => setDeleteDocData(null)} loading={removeDoc.isPending} onConfirm={() => { if (deleteDocData) removeDoc.mutate(deleteDocData, { onSuccess: () => setDeleteDocData(null) }); }} title="Delete Document" />
-      <InviteEmployeeDialog open={inviteOpen} onOpenChange={setInviteOpen} loading={createInvite.isPending} onSubmit={(email, role) => { createInvite.mutate({ email, role }, { onSuccess: () => setInviteOpen(false) }); }} />
+      <CredentialsDialog open={!!credentialsData} onOpenChange={() => setCredentialsData(null)} email={credentialsData?.email ?? ''} password={credentialsData?.password ?? ''} />
     </div>
   );
 }

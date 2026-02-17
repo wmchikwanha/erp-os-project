@@ -264,13 +264,14 @@ export function useUpsertEmployee() {
   const qc = useQueryClient();
   const { user } = useAuth();
   return useMutation({
-    mutationFn: async (emp: { id?: string; name: string; role?: string; department?: string; start_date?: string; leave_balance?: number; contact_id?: string | null; email?: string; job_title?: string; app_role?: string }) => {
+    mutationFn: async (emp: { id?: string; name: string; role?: string; department?: string; start_date?: string; leave_balance?: number; contact_id?: string | null; email?: string; job_title?: string; app_role?: string; password?: string }) => {
       if (emp.id) {
         // Edit existing employee – direct update
-        const { app_role, ...updateFields } = emp;
+        const { app_role, password, ...updateFields } = emp;
         const payload = { ...updateFields, user_id: user!.id };
         const { error } = await supabase.from('employees').update(payload).eq('id', emp.id);
         if (error) throw error;
+        return { isNew: false };
       } else {
         // New employee – call edge function to create auth account + employee record
         const { data: { session } } = await supabase.auth.getSession();
@@ -285,6 +286,7 @@ export function useUpsertEmployee() {
         });
         const result = await res.json();
         if (!res.ok) throw new Error(result.error || 'Failed to create employee account');
+        return { isNew: true, email: emp.email, password: emp.password };
       }
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['employees'] }); toast.success('Employee saved'); },
