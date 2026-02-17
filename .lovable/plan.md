@@ -1,116 +1,84 @@
 
 
-# Fix: Employees Not Visible to Admin (and Projects, HR pages broken)
+# Fix: New Employees Unable to Login
 
-## Root Cause Found
+## Problems Found
 
-The Postgres error logs show hundreds of **"permission denied for table users"** errors. This is caused by one RLS policy on the `employees` table:
+### 1. Password Reset Emails Never Arrive
+The `generateLink({ type: 'recovery' })` call in the edge function generates a link object server-side but does NOT send an email. The built-in email service on Lovable Cloud has very limited delivery capability -- most emails to external addresses (Gmail, Hotmail) simply don't arrive. This means:
+- New employees never get the "Set Password" email
+- "Forgot Password" reset links also don't arrive
+- Invited users never get invitation emails
 
-```sql
--- This policy has a subquery to auth.users, which the authenticated role CANNOT access
-"Employees can view own employee record"
-USING (
-  user_id = auth.uid() 
-  OR email = (SELECT users.email FROM auth.users WHERE users.id = auth.uid())::text
-)
+### 2. Employees Created with Unguessable Random Passwords
+The edge function sets `crypto.randomUUID() + '!Aa1'` as the password. Since the reset email never arrives, the employee has no way to know their password and cannot login.
+
+### 3. Users Created Directly in Backend Have No Role
+`welluz101@hotmail.com` was created directly in the backend but has no entry in `user_roles`, so the app shows "Pending Approval" with no way for admin to assign a role.
+
+### 4. Invitation System is Redundant and Causes Duplicates
+Inviting + adding the same person creates duplicate employee records (astinmarten71@gmail.com appears twice).
+
+## Solution: Admin Sets Initial Password
+
+Since email delivery is unreliable, the admin will set the employee's initial password directly. The password is shown once in a confirmation dialog so the admin can share it with the employee (in person, via chat, etc.). The employee can change it later via "Forgot Password" or profile settings.
+
+```text
+Admin adds employee (name, email, role, initial password)
+         |
+         v
+Edge function creates account with that password
+         |
+         v
+Admin shares credentials with employee directly
+         |
+         v
+Employee logs in and changes password when ready
 ```
 
-The `authenticated` database role does not have SELECT permission on `auth.users`. So every time ANY query touches the `employees` table, PostgreSQL tries to evaluate this subquery and fails with "permission denied." This breaks:
+## Changes
 
-- **HR page**: Direct query to employees fails, plus leave_requests, reviews, and documents all join with employees
-- **Projects page**: The query `select('*, deals(title), employees(name)')` joins employees via manager_id FK
-- **Slow loading**: The repeated permission errors cause timeouts and retries
+### 1. Update Employee Form -- Add Password Field
+Add a "Set Initial Password" field (required, min 6 chars) to `EmployeeFormDialog.tsx` for new employees only. Include a generate-random-password button for convenience.
 
-Products, contacts, and basic assets work because they don't touch the employees table.
+### 2. Update Edge Function -- Use Admin-Provided Password
+Change `create-employee-account` to accept a `password` field from the request body instead of generating a random one. Remove the `generateLink` call since emails don't deliver.
 
-## Additional Issue: Employee Self-Access
+### 3. Show Credentials Confirmation
+After successfully creating an employee, show a dialog with the login credentials (email + password) so the admin can copy and share them. This only appears once.
 
-The edge function creates employees with `user_id = admin's ID` (so admin can manage them via RLS). But the employee's own auth user ID is never stored on the employee record, so employees can only find their record by email match -- which is what the broken policy was trying to do.
+### 4. Add Role Assignment for Orphaned Users
+Add a simple "Assign Role" capability in the HR page so admin can assign roles to users who were created directly in the backend (like welluz101@hotmail.com). This eliminates the "Pending Approval" dead end.
 
-## Fix Plan
-
-### Step 1: Database Migration
-
-a) **Create a SECURITY DEFINER function** to safely get the current user's email without directly querying auth.users:
-
-```sql
-CREATE OR REPLACE FUNCTION public.get_auth_email()
-RETURNS text
-LANGUAGE sql
-STABLE
-SECURITY DEFINER
-SET search_path = public
-AS $$
-  SELECT email FROM auth.users WHERE id = auth.uid()
-$$;
-```
-
-b) **Drop and recreate the broken RLS policy** on employees:
-
-```sql
-DROP POLICY "Employees can view own employee record" ON public.employees;
-
-CREATE POLICY "Employees can view own employee record"
-ON public.employees FOR SELECT
-USING (
-  user_id = auth.uid() 
-  OR email = public.get_auth_email()
-);
-```
-
-This gives the same behavior (employees can find their record by email) but without the permission error.
-
-### Step 2: Update Edge Function
-
-Store the new auth user's ID on the employee record so we have a direct link. Update `create-employee-account` to set a link between the employee record and their auth account, enabling future RLS improvements.
-
-Currently the edge function does:
-```js
-user_id: caller.id  // admin's ID
-```
-
-After the employee's auth account is created, also store their user ID by updating the employee row.
-
-### Step 3: No Frontend Changes Needed
-
-The queries and UI code are all correct. Once the RLS policy is fixed, employees and projects will render immediately.
-
----
+### 5. Remove Invitation Tab
+The invitation system is now redundant since admin creates accounts directly. Remove the Invitations tab from HR to avoid confusion and duplicate records.
 
 ## Technical Details
-
-### Database Migration SQL
-
-```sql
--- 1. Create helper function (SECURITY DEFINER bypasses auth.users restriction)
-CREATE OR REPLACE FUNCTION public.get_auth_email()
-RETURNS text
-LANGUAGE sql
-STABLE SECURITY DEFINER
-SET search_path = public
-AS $$
-  SELECT email FROM auth.users WHERE id = auth.uid()
-$$;
-
--- 2. Fix the broken employees policy
-DROP POLICY IF EXISTS "Employees can view own employee record" ON public.employees;
-CREATE POLICY "Employees can view own employee record"
-ON public.employees FOR SELECT
-USING (user_id = auth.uid() OR email = public.get_auth_email());
-```
 
 ### Files to Modify
 
 | File | Change |
 |------|--------|
-| Database migration (new) | Create `get_auth_email()` function and fix RLS policy |
+| `src/components/forms/EmployeeFormDialog.tsx` | Add password field + generate button for new employees |
+| `supabase/functions/create-employee-account/index.ts` | Accept password from request, remove generateLink call |
+| `src/hooks/useCrmData.ts` | Return credentials from mutation, pass password to edge function |
+| `src/pages/HRPage.tsx` | Add credentials confirmation dialog after employee creation; remove Invitations tab; add role assignment for unlinked users |
+
+### Edge Function Changes
+
+```text
+Before: Random password + generateLink (email never arrives)
+After:  Admin-provided password, no email dependency
+```
+
+### Data Cleanup
+- Remove duplicate employee records via a database query
+- The `invitations` table stays in the database but is no longer used in the UI
 
 ### What This Fixes
-
-- Admin can see all employees they created (via `user_id = auth.uid()`)
-- Employees can see their own record (via email match using safe function)
-- HR page loads correctly (all sub-queries stop erroring)
-- Projects page loads correctly (employees join stops erroring)
-- Performance reviews employee dropdown populates correctly
-- Documents tab works for admin
+- Employees can login immediately with credentials shared by admin
+- No dependency on email delivery
+- No more "Pending Approval" dead end for backend-created users
+- No more duplicate employee records from invitation + add
+- Simpler, more reliable onboarding flow
 
