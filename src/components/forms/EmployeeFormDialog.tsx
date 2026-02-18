@@ -31,12 +31,14 @@ interface EmployeeFormProps {
   onSubmit: (data: any) => void;
   initialData?: any;
   loading?: boolean;
+  employees?: { id: string; name: string }[];
 }
 
-export function EmployeeFormDialog({ open, onOpenChange, onSubmit, initialData, loading }: EmployeeFormProps) {
+export function EmployeeFormDialog({ open, onOpenChange, onSubmit, initialData, loading, employees = [] }: EmployeeFormProps) {
   const [form, setForm] = useState({
     name: '', role: '', department: '', start_date: '', leave_balance: 20,
     email: '', job_title: '', app_role: 'employee' as AppRole, password: '',
+    manager_id: '' as string,
   });
   const [showPassword, setShowPassword] = useState(false);
 
@@ -47,17 +49,18 @@ export function EmployeeFormDialog({ open, onOpenChange, onSubmit, initialData, 
         department: initialData.department ?? '', start_date: initialData.start_date ?? '',
         leave_balance: initialData.leave_balance ?? 20, email: initialData.email ?? '',
         job_title: initialData.job_title ?? '', app_role: initialData.app_role ?? 'employee',
-        password: '',
+        password: '', manager_id: initialData.manager_id ?? '',
       });
     } else {
-      setForm({ name: '', role: '', department: '', start_date: '', leave_balance: 20, email: '', job_title: '', app_role: 'employee', password: generatePassword() });
+      setForm({ name: '', role: '', department: '', start_date: '', leave_balance: 20, email: '', job_title: '', app_role: 'employee', password: generatePassword(), manager_id: '' });
     }
     setShowPassword(false);
   }, [initialData, open]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({ ...form, ...(initialData?.id ? { id: initialData.id } : {}) });
+    const submitData = { ...form, manager_id: form.manager_id || null, ...(initialData?.id ? { id: initialData.id } : {}) };
+    onSubmit(submitData);
   };
 
   const isNew = !initialData?.id;
@@ -121,6 +124,18 @@ export function EmployeeFormDialog({ open, onOpenChange, onSubmit, initialData, 
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div><Label>Leave Balance</Label><Input type="number" min={0} value={form.leave_balance} onChange={e => setForm(f => ({ ...f, leave_balance: Number(e.target.value) }))} /></div>
+            <div>
+              <Label>Manager</Label>
+              <Select value={form.manager_id} onValueChange={(v) => setForm(f => ({ ...f, manager_id: v === '_none' ? '' : v }))}>
+                <SelectTrigger><SelectValue placeholder="Select manager" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="_none">No manager</SelectItem>
+                  {employees.filter(e => e.id !== initialData?.id).map(e => (
+                    <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           {isNew && (
             <p className="text-xs text-muted-foreground">Share the login credentials with the employee after creation.</p>
