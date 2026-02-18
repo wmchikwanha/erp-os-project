@@ -116,6 +116,11 @@ export default function HRPage() {
                   <span>{emp.department}</span>
                   <span>{emp.leave_balance} days leave</span>
                 </div>
+                {emp.manager_id && (
+                  <p className="text-xs text-muted-foreground/60 mt-1">
+                    Manager: {employees.find(m => m.id === emp.manager_id)?.name ?? 'Unknown'}
+                  </p>
+                )}
               </div>
             ))}
             {employees.length === 0 && <div className="col-span-full py-8 text-center text-muted-foreground text-sm">No employees yet</div>}
@@ -248,7 +253,7 @@ export default function HRPage() {
       )}
 
       {/* Dialogs */}
-      <EmployeeFormDialog open={formOpen} onOpenChange={setFormOpen} initialData={editItem} loading={upsertEmp.isPending} onSubmit={handleEmployeeSubmit} />
+      <EmployeeFormDialog open={formOpen} onOpenChange={setFormOpen} initialData={editItem} loading={upsertEmp.isPending} onSubmit={handleEmployeeSubmit} employees={employees.map(e => ({ id: e.id, name: e.name }))} />
       <DeleteConfirmDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)} loading={removeEmp.isPending} onConfirm={() => { if (deleteId) removeEmp.mutate(deleteId, { onSuccess: () => setDeleteId(null) }); }} title="Delete Employee" />
       <ReviewFormDialog open={reviewFormOpen} onOpenChange={setReviewFormOpen} initialData={editReview} employees={employees.map(e => ({ id: e.id, name: e.name }))} loading={upsertReview.isPending} onSubmit={(data) => { upsertReview.mutate(data, { onSuccess: () => setReviewFormOpen(false) }); }} />
       <DeleteConfirmDialog open={!!deleteReviewId} onOpenChange={() => setDeleteReviewId(null)} loading={removeReview.isPending} onConfirm={() => { if (deleteReviewId) removeReview.mutate(deleteReviewId, { onSuccess: () => setDeleteReviewId(null) }); }} title="Delete Review" />

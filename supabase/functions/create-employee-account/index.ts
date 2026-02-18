@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json()
-    const { email, name, role, department, job_title, start_date, leave_balance, app_role, password } = body
+    const { email, name, role, department, job_title, start_date, leave_balance, app_role, password, manager_id } = body
 
     if (!email || !name) {
       return new Response(JSON.stringify({ error: 'Email and name are required' }), {
@@ -98,6 +98,7 @@ Deno.serve(async (req) => {
       leave_balance: leave_balance ?? 20,
       app_role: selectedRole,
       user_id: caller.id,
+      manager_id: manager_id || null,
     }).select('id').single()
 
     if (empError) {

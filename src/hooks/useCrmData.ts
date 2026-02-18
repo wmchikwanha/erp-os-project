@@ -264,7 +264,7 @@ export function useUpsertEmployee() {
   const qc = useQueryClient();
   const { user } = useAuth();
   return useMutation({
-    mutationFn: async (emp: { id?: string; name: string; role?: string; department?: string; start_date?: string; leave_balance?: number; contact_id?: string | null; email?: string; job_title?: string; app_role?: string; password?: string }) => {
+    mutationFn: async (emp: { id?: string; name: string; role?: string; department?: string; start_date?: string; leave_balance?: number; contact_id?: string | null; email?: string; job_title?: string; app_role?: string; password?: string; manager_id?: string | null }) => {
       if (emp.id) {
         // Edit existing employee – direct update
         const { app_role, password, ...updateFields } = emp;
