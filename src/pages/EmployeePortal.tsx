@@ -34,6 +34,11 @@ export default function EmployeePortal() {
   const loading = lr || ld || ll;
   if (loading) return <div className="py-12 text-center text-muted-foreground text-sm">Loading your portal...</div>;
 
+  // Filter to only show current employee's data
+  const myLeaveRequests = myEmployee ? leaveRequests.filter((lr: any) => lr.employee_id === myEmployee.id) : leaveRequests.filter((lr: any) => lr.user_id === user?.id);
+  const myDocuments = myEmployee ? documents.filter((d: any) => d.employee_id === myEmployee.id) : documents;
+  const myReviews = myEmployee ? reviews.filter((r: any) => r.employee_id === myEmployee.id) : reviews;
+
   const handleDownload = async (filePath: string) => {
     const { data } = await supabase.storage.from('employee-documents').createSignedUrl(filePath, 60);
     if (data?.signedUrl) window.open(data.signedUrl, '_blank');
@@ -82,7 +87,7 @@ export default function EmployeePortal() {
             <Button size="sm" onClick={() => setLeaveFormOpen(true)}><Plus className="w-4 h-4 mr-1" />Request Leave</Button>
           </div>
           <div className="bg-card border border-border rounded-lg divide-y divide-border">
-            {leaveRequests.map((lr: any) => {
+          {myLeaveRequests.map((lr: any) => {
               const Icon = leaveStatusIcon[lr.status] ?? Clock;
               return (
                 <div key={lr.id} className="px-4 py-3 flex items-center justify-between">
@@ -99,7 +104,7 @@ export default function EmployeePortal() {
                 </div>
               );
             })}
-            {leaveRequests.length === 0 && <p className="text-sm text-muted-foreground py-6 text-center">No leave requests</p>}
+            {myLeaveRequests.length === 0 && <p className="text-sm text-muted-foreground py-6 text-center">No leave requests</p>}
           </div>
         </TabsContent>
 
@@ -112,7 +117,7 @@ export default function EmployeePortal() {
             )}
           </div>
           <div className="bg-card border border-border rounded-lg divide-y divide-border">
-            {documents.map((doc: any) => (
+          {myDocuments.map((doc: any) => (
               <div key={doc.id} className="px-4 py-3 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <FileText className="w-4 h-4 text-muted-foreground" />
@@ -126,7 +131,7 @@ export default function EmployeePortal() {
                 </button>
               </div>
             ))}
-            {documents.length === 0 && <p className="text-sm text-muted-foreground py-6 text-center">No documents on file</p>}
+            {myDocuments.length === 0 && <p className="text-sm text-muted-foreground py-6 text-center">No documents on file</p>}
           </div>
         </TabsContent>
 
@@ -134,7 +139,7 @@ export default function EmployeePortal() {
         <TabsContent value="reviews">
           <h3 className="text-sm font-semibold mb-3">My Performance Reviews</h3>
           <div className="space-y-3">
-            {reviews.map((r: any) => (
+          {myReviews.map((r: any) => (
               <div key={r.id} className="bg-card border border-border rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium">{r.review_period}</span>
@@ -150,7 +155,7 @@ export default function EmployeePortal() {
                 <p className="text-[10px] text-muted-foreground/60 mt-2">{r.review_date}</p>
               </div>
             ))}
-            {reviews.length === 0 && <p className="text-sm text-muted-foreground py-4 text-center">No reviews yet</p>}
+            {myReviews.length === 0 && <p className="text-sm text-muted-foreground py-4 text-center">No reviews yet</p>}
           </div>
         </TabsContent>
       </Tabs>
