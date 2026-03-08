@@ -52,6 +52,7 @@ export default function HRPage() {
   const [docEmployeeId, setDocEmployeeId] = useState<string | null>(null);
   const [deleteDocData, setDeleteDocData] = useState<{ id: string; filePath: string } | null>(null);
   const [credentialsData, setCredentialsData] = useState<{ email: string; password: string } | null>(null);
+  const [csvInviteOpen, setCsvInviteOpen] = useState(false);
 
   const loading = loadingEmp || loadingLR || loadingRev || loadingDoc;
   if (loading) return <div className="py-12 text-center text-muted-foreground text-sm">Loading HR data...</div>;
