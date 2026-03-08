@@ -148,7 +148,6 @@ export default function EmployeePortal() {
       </Tabs>
 
       <LeaveRequestFormDialog open={leaveFormOpen} onOpenChange={setLeaveFormOpen} loading={upsertLeave.isPending} onSubmit={handleLeaveSubmit} />
-      <DocumentUploadDialog open={docUploadOpen} onOpenChange={setDocUploadOpen} loading={uploadDoc.isPending} onSubmit={handleDocUpload} />
     </div>
   );
 }
