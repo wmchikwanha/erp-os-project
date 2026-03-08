@@ -22,10 +22,8 @@ export default function EmployeePortal() {
   const { data: documents = [], isLoading: ld } = useEmployeeDocuments();
   const { data: leaveRequests = [], isLoading: ll } = useLeaveRequests();
   const upsertLeave = useUpsertLeaveRequest();
-  const uploadDoc = useUploadDocument();
 
   const [leaveFormOpen, setLeaveFormOpen] = useState(false);
-  const [docUploadOpen, setDocUploadOpen] = useState(false);
 
   // Find the employee record linked to this user
   const myEmployee = employees.find((e: any) => e.user_id === user?.id || e.email === user?.email);
