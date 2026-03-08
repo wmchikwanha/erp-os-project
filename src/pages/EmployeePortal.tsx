@@ -48,13 +48,6 @@ export default function EmployeePortal() {
     );
   };
 
-  const handleDocUpload = (data: { file: File; name: string; category: string; expiry_date?: string; notes?: string }) => {
-    if (!myEmployee) return;
-    uploadDoc.mutate(
-      { employeeId: myEmployee.id, ...data },
-      { onSuccess: () => setDocUploadOpen(false) }
-    );
-  };
 
   return (
     <div className="space-y-6 animate-slide-in max-w-3xl">
