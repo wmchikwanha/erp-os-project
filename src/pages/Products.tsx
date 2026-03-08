@@ -11,9 +11,11 @@ export default function Products() {
   const { data: products = [], isLoading } = useProducts();
   const upsert = useUpsertProduct();
   const remove = useDeleteProduct();
+  const bulkImport = useBulkImportProducts();
   const [formOpen, setFormOpen] = useState(false);
   const [editItem, setEditItem] = useState<any>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [csvOpen, setCsvOpen] = useState(false);
 
   if (isLoading) return <div className="py-12 text-center text-muted-foreground text-sm">Loading products...</div>;
 
