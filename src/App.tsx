@@ -87,6 +87,7 @@ function ProtectedRoutes() {
       <AppLayout role={role}>
         <Routes>
           <Route path="/" element={<EmployeePortal />} />
+          <Route path="/settings" element={<Settings />} />
           {routes.map(r => <Route key={r.path} path={r.path} element={r.element} />)}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
