@@ -656,3 +656,247 @@ export function useDeleteProject() {
     onError: (e: Error) => toast.error(e.message),
   });
 }
+
+// ─── Sites ───
+
+export function useSites() {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ['sites', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('sites').select('*, employees(name)').order('created_at', { ascending: false });
+      if (error) throw error;
+      return data.map((s: any) => ({ ...s, manager_name: s.employees?.name ?? null }));
+    },
+    enabled: !!user,
+  });
+}
+
+export function useUpsertSite() {
+  const qc = useQueryClient();
+  const { user } = useAuth();
+  return useMutation({
+    mutationFn: async (site: { id?: string; name: string; address?: string; city?: string; state?: string; country?: string; manager_id?: string | null; status?: string; start_date?: string; end_date?: string; notes?: string }) => {
+      const payload = { ...site, user_id: user!.id };
+      if (site.id) {
+        const { error } = await supabase.from('sites').update(payload).eq('id', site.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from('sites').insert(payload);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['sites'] }); toast.success('Site saved'); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export function useDeleteSite() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('sites').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['sites'] }); toast.success('Site deleted'); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+// ─── Work Schedules ───
+
+export function useWorkSchedules(date?: string) {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ['work_schedules', user?.id, date],
+    queryFn: async () => {
+      let q = supabase.from('work_schedules').select('*, employees(name), sites(name), projects(name)').order('schedule_date', { ascending: true });
+      if (date) q = q.eq('schedule_date', date);
+      const { data, error } = await q;
+      if (error) throw error;
+      return data.map((ws: any) => ({ ...ws, employee_name: ws.employees?.name ?? 'Unknown', site_name: ws.sites?.name ?? null, project_name: ws.projects?.name ?? null }));
+    },
+    enabled: !!user,
+  });
+}
+
+export function useUpsertWorkSchedule() {
+  const qc = useQueryClient();
+  const { user } = useAuth();
+  return useMutation({
+    mutationFn: async (ws: { id?: string; site_id?: string | null; employee_id: string; project_id?: string | null; schedule_date: string; shift_start?: string; shift_end?: string; status?: string; notes?: string }) => {
+      const payload = { ...ws, user_id: user!.id };
+      if (ws.id) {
+        const { error } = await supabase.from('work_schedules').update(payload).eq('id', ws.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from('work_schedules').insert(payload);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['work_schedules'] }); toast.success('Schedule saved'); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export function useDeleteWorkSchedule() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('work_schedules').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['work_schedules'] }); toast.success('Schedule deleted'); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+// ─── Equipment Checkouts ───
+
+export function useEquipmentCheckouts() {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ['equipment_checkouts', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('equipment_checkouts').select('*, assets(name, asset_tag), employees!equipment_checkouts_checked_out_to_fkey(name), sites(name), projects(name)').order('checkout_date', { ascending: false });
+      if (error) throw error;
+      return data.map((c: any) => ({
+        ...c,
+        asset_name: c.assets?.name ?? 'Unknown',
+        asset_tag: c.assets?.asset_tag ?? null,
+        worker_name: c.employees?.name ?? 'Unknown',
+        site_name: c.sites?.name ?? null,
+        project_name: c.projects?.name ?? null,
+      }));
+    },
+    enabled: !!user,
+  });
+}
+
+export function useCreateCheckout() {
+  const qc = useQueryClient();
+  const { user } = useAuth();
+  return useMutation({
+    mutationFn: async (checkout: { asset_id: string; checked_out_to: string; checked_out_by?: string; site_id?: string | null; project_id?: string | null; expected_return_date?: string; checkout_condition?: string; checkout_notes?: string }) => {
+      const { error } = await supabase.from('equipment_checkouts').insert({ ...checkout, user_id: user!.id });
+      if (error) throw error;
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['equipment_checkouts'] }); toast.success('Equipment checked out'); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export function useReturnCheckout() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, return_condition, return_notes }: { id: string; return_condition: string; return_notes?: string }) => {
+      const { error } = await supabase.from('equipment_checkouts').update({ status: 'returned', actual_return_date: new Date().toISOString(), return_condition, return_notes }).eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['equipment_checkouts'] }); toast.success('Equipment returned'); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export function useAcknowledgeCheckout() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('equipment_checkouts').update({ acknowledged_by_worker: true, acknowledged_at: new Date().toISOString() }).eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['equipment_checkouts'] }); toast.success('Checkout acknowledged'); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+// ─── Maintenance Logs ───
+
+export function useMaintenanceLogs(assetId?: string) {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ['maintenance_logs', user?.id, assetId],
+    queryFn: async () => {
+      let q = supabase.from('maintenance_logs').select('*, assets(name, asset_tag)').order('performed_date', { ascending: false });
+      if (assetId) q = q.eq('asset_id', assetId);
+      const { data, error } = await q;
+      if (error) throw error;
+      return data.map((m: any) => ({ ...m, asset_name: m.assets?.name ?? 'Unknown', asset_tag: m.assets?.asset_tag ?? null }));
+    },
+    enabled: !!user,
+  });
+}
+
+export function useUpsertMaintenanceLog() {
+  const qc = useQueryClient();
+  const { user } = useAuth();
+  return useMutation({
+    mutationFn: async (log: { id?: string; asset_id: string; maintenance_type?: string; description?: string; performed_by?: string; performed_date?: string; next_due_date?: string; cost?: number; downtime_hours?: number; status?: string; notes?: string }) => {
+      const payload = { ...log, user_id: user!.id };
+      if (log.id) {
+        const { error } = await supabase.from('maintenance_logs').update(payload).eq('id', log.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from('maintenance_logs').insert(payload);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['maintenance_logs'] }); toast.success('Maintenance log saved'); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export function useDeleteMaintenanceLog() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('maintenance_logs').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['maintenance_logs'] }); toast.success('Maintenance log deleted'); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+// ─── Inventory Consumption ───
+
+export function useInventoryConsumption() {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ['inventory_consumption', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('inventory_consumption').select('*, products(name, sku, stock_quantity, reorder_level), sites(name), projects(name), employees(name)').order('consumption_date', { ascending: false });
+      if (error) throw error;
+      return data.map((ic: any) => ({
+        ...ic,
+        product_name: ic.products?.name ?? 'Unknown',
+        product_sku: ic.products?.sku ?? null,
+        stock_quantity: ic.products?.stock_quantity ?? 0,
+        reorder_level: ic.products?.reorder_level ?? 0,
+        site_name: ic.sites?.name ?? null,
+        project_name: ic.projects?.name ?? null,
+        employee_name: ic.employees?.name ?? null,
+      }));
+    },
+    enabled: !!user,
+  });
+}
+
+export function useLogConsumption() {
+  const qc = useQueryClient();
+  const { user } = useAuth();
+  return useMutation({
+    mutationFn: async (entry: { product_id: string; site_id?: string | null; project_id?: string | null; consumed_by?: string | null; quantity: number; consumption_date?: string; notes?: string }) => {
+      const { error } = await supabase.from('inventory_consumption').insert({ ...entry, user_id: user!.id });
+      if (error) throw error;
+      // Decrement stock
+      const { data: product } = await supabase.from('products').select('stock_quantity').eq('id', entry.product_id).single();
+      if (product) {
+        const newQty = Math.max(0, product.stock_quantity - entry.quantity);
+        await supabase.from('products').update({ stock_quantity: newQty }).eq('id', entry.product_id);
+      }
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['inventory_consumption'] }); qc.invalidateQueries({ queryKey: ['products'] }); toast.success('Consumption logged'); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
