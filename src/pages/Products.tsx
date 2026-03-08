@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { useProducts, useUpsertProduct, useDeleteProduct } from '@/hooks/useCrmData';
-import { AlertTriangle, Plus, Pencil, Trash2 } from 'lucide-react';
+import { useProducts, useUpsertProduct, useDeleteProduct, useBulkImportProducts } from '@/hooks/useCrmData';
+import { AlertTriangle, Plus, Pencil, Trash2, Upload } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ProductFormDialog } from '@/components/forms/ProductFormDialog';
 import { DeleteConfirmDialog } from '@/components/forms/DeleteConfirmDialog';
+import { CsvImportDialog } from '@/components/forms/CsvImportDialog';
 
 export default function Products() {
   const { data: products = [], isLoading } = useProducts();
