@@ -22,7 +22,10 @@ export default function Products() {
   return (
     <div className="space-y-4 animate-slide-in">
       <div className="flex justify-end">
+      <div className="flex gap-2 justify-end">
+        <Button size="sm" variant="outline" onClick={() => setCsvOpen(true)}><Upload className="w-4 h-4 mr-1" />Import CSV</Button>
         <Button size="sm" onClick={() => { setEditItem(null); setFormOpen(true); }}><Plus className="w-4 h-4 mr-1" />Add Product</Button>
+      </div>
       </div>
       <div className="bg-card border border-border rounded-lg overflow-hidden">
         <div className="overflow-x-auto">

@@ -106,6 +106,7 @@ export default function Contacts() {
 
       <ContactFormDialog open={formOpen} onOpenChange={setFormOpen} initialData={editItem} loading={upsert.isPending} onSubmit={(data) => { upsert.mutate(data, { onSuccess: () => setFormOpen(false) }); }} />
       <DeleteConfirmDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)} loading={remove.isPending} onConfirm={() => { if (deleteId) remove.mutate(deleteId, { onSuccess: () => setDeleteId(null) }); }} title="Delete Contact" />
+      <CsvImportDialog open={csvOpen} onOpenChange={setCsvOpen} title="Import Contacts CSV" expectedColumns={['name', 'email', 'phone', 'company', 'type', 'status']} loading={bulkImport.isPending} onImport={(rows) => { bulkImport.mutate(rows, { onSuccess: () => setCsvOpen(false) }); }} />
     </div>
   );
 }
