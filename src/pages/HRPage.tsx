@@ -4,15 +4,17 @@ import {
   useLeaveRequests, useUpdateLeaveStatus,
   usePerformanceReviews, useUpsertReview, useDeleteReview,
   useEmployeeDocuments, useUploadDocument, useDeleteDocument,
+  useBulkImportInvitations,
 } from '@/hooks/useCrmData';
 import { cn } from '@/lib/utils';
-import { Check, X, Clock, Plus, Pencil, Trash2, Star, FileText, Download } from 'lucide-react';
+import { Check, X, Clock, Plus, Pencil, Trash2, Star, FileText, Download, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EmployeeFormDialog } from '@/components/forms/EmployeeFormDialog';
 import { DeleteConfirmDialog } from '@/components/forms/DeleteConfirmDialog';
 import { ReviewFormDialog } from '@/components/forms/ReviewFormDialog';
 import { DocumentUploadDialog } from '@/components/forms/DocumentUploadDialog';
 import { CredentialsDialog } from '@/components/forms/CredentialsDialog';
+import { CsvImportDialog } from '@/components/forms/CsvImportDialog';
 import { supabase } from '@/integrations/supabase/client';
 
 const leaveStatusIcon: Record<string, any> = { pending: Clock, approved: Check, rejected: X };
