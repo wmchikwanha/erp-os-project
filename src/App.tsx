@@ -15,6 +15,11 @@ import Invoices from "./pages/Invoices";
 import HRPage from "./pages/HRPage";
 import Reports from "./pages/Reports";
 import Projects from "./pages/Projects";
+import Sites from "./pages/Sites";
+import Scheduling from "./pages/Scheduling";
+import EquipmentCheckouts from "./pages/EquipmentCheckouts";
+import Maintenance from "./pages/Maintenance";
+import Consumption from "./pages/Consumption";
 import EmployeePortal from "./pages/EmployeePortal";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
@@ -38,11 +43,21 @@ function PendingApproval() {
   );
 }
 
-const DEPT_ROUTE_MAP: Record<string, { path: string; element: React.ReactNode }> = {
-  procurement_manager: { path: '/procurement', element: <Procurement /> },
-  hr_manager: { path: '/hr', element: <HRPage /> },
-  project_manager: { path: '/projects', element: <Projects /> },
-  finance_manager: { path: '/invoices', element: <Invoices /> },
+const DEPT_ROUTE_MAP: Record<string, { path: string; element: React.ReactNode }[]> = {
+  procurement_manager: [
+    { path: '/procurement', element: <Procurement /> },
+    { path: '/sites', element: <Sites /> },
+    { path: '/equipment', element: <EquipmentCheckouts /> },
+    { path: '/maintenance', element: <Maintenance /> },
+    { path: '/consumption', element: <Consumption /> },
+  ],
+  hr_manager: [{ path: '/hr', element: <HRPage /> }],
+  project_manager: [
+    { path: '/projects', element: <Projects /> },
+    { path: '/sites', element: <Sites /> },
+    { path: '/scheduling', element: <Scheduling /> },
+  ],
+  finance_manager: [{ path: '/invoices', element: <Invoices /> }],
 };
 
 function ProtectedRoutes() {
