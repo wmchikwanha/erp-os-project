@@ -967,3 +967,143 @@ export function useBulkImportInvitations() {
     onError: (e: Error) => toast.error(e.message),
   });
 }
+
+// ─── Payments ───
+
+export function usePayments() {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ['payments', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('payments').select('*').order('payment_date', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+}
+
+export function useRecordPayment() {
+  const qc = useQueryClient();
+  const { user } = useAuth();
+  return useMutation({
+    mutationFn: async (payment: { invoice_id?: string; amount: number | string; payment_date: string; method?: string; reference?: string }) => {
+      const { error } = await supabase.from('payments').insert({
+        ...payment,
+        amount: Number(payment.amount),
+        invoice_id: payment.invoice_id || null,
+        user_id: user!.id,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['payments'] }); qc.invalidateQueries({ queryKey: ['invoices'] }); toast.success('Payment recorded'); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+// ─── Timesheets ───
+
+export function useTimesheets() {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ['timesheets', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('timesheets').select('*').order('work_date', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+}
+
+export function useUpsertTimesheet() {
+  const qc = useQueryClient();
+  const { user } = useAuth();
+  return useMutation({
+    mutationFn: async (ts: any) => {
+      const payload = {
+        employee_id: ts.employee_id,
+        project_id: ts.project_id || null,
+        site_id: ts.site_id || null,
+        work_date: ts.work_date,
+        hours_worked: ts.hours_worked,
+        description: ts.description || null,
+        status: ts.status || 'draft',
+        approved_by: ts.approved_by || null,
+        user_id: user!.id,
+      };
+      if (ts.id) {
+        const { error } = await supabase.from('timesheets').update(payload).eq('id', ts.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from('timesheets').insert(payload);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['timesheets'] }); toast.success('Timesheet saved'); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+// ─── Expenses ───
+
+export function useExpenses() {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ['expenses', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('expenses').select('*').order('expense_date', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+}
+
+export function useUpsertExpense() {
+  const qc = useQueryClient();
+  const { user } = useAuth();
+  return useMutation({
+    mutationFn: async (exp: any) => {
+      const payload = {
+        employee_id: exp.employee_id || null,
+        project_id: exp.project_id || null,
+        site_id: exp.site_id || null,
+        category: exp.category || 'general',
+        amount: Number(exp.amount),
+        expense_date: exp.expense_date,
+        description: exp.description || null,
+        receipt_path: exp.receipt_path || null,
+        status: exp.status || 'pending',
+        approved_by: exp.approved_by || null,
+        user_id: user!.id,
+      };
+      if (exp.id) {
+        const { error } = await supabase.from('expenses').update(payload).eq('id', exp.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from('expenses').insert(payload);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['expenses'] }); toast.success('Expense saved'); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+  const qc = useQueryClient();
+  const { user } = useAuth();
+  return useMutation({
+    mutationFn: async (rows: Record<string, string>[]) => {
+      const payload = rows.map(r => ({
+        email: r.email,
+        role: (r.role || 'employee') as any,
+        invited_by: user!.id,
+      }));
+      const { error } = await supabase.from('invitations').insert(payload);
+      if (error) throw error;
+      return payload.length;
+    },
+    onSuccess: (count) => { qc.invalidateQueries({ queryKey: ['invitations'] }); toast.success(`${count} invitations created`); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}

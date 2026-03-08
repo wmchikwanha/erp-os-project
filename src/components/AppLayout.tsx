@@ -2,12 +2,13 @@ import { NavLink, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Users, Handshake, CalendarCheck, Package,
   FileText, UserCog, BarChart3, Settings, ChevronLeft, Menu, LogOut, Home, FolderKanban,
-  Building2, CalendarDays, PackageCheck, Wrench, TrendingDown,
+  Building2, CalendarDays, PackageCheck, Wrench, TrendingDown, CreditCard, Timer, Receipt,
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import AskAIPanel from '@/components/AskAIPanel';
+import NotificationsPanel from '@/components/NotificationsPanel';
 import type { AppRole } from '@/hooks/useRole';
 
 const ALL_NAV_ITEMS = [
@@ -18,12 +19,15 @@ const ALL_NAV_ITEMS = [
   { to: '/projects', icon: FolderKanban, label: 'Projects', roles: ['admin', 'project_manager'] },
   { to: '/sites', icon: Building2, label: 'Sites', roles: ['admin', 'project_manager', 'procurement_manager'] },
   { to: '/scheduling', icon: CalendarDays, label: 'Scheduling', roles: ['admin', 'project_manager'] },
+  { to: '/timesheets', icon: Timer, label: 'Timesheets', roles: ['admin', 'project_manager'] },
   { to: '/equipment', icon: PackageCheck, label: 'Equipment', roles: ['admin', 'procurement_manager'] },
   { to: '/maintenance', icon: Wrench, label: 'Maintenance', roles: ['admin', 'procurement_manager'] },
   { to: '/consumption', icon: TrendingDown, label: 'Consumption', roles: ['admin', 'procurement_manager'] },
   { to: '/activities', icon: CalendarCheck, label: 'Activities', roles: ['admin'] },
   { to: '/procurement', icon: Package, label: 'Procurement', roles: ['admin', 'procurement_manager'] },
   { to: '/invoices', icon: FileText, label: 'Invoices', roles: ['admin', 'finance_manager'] },
+  { to: '/payments', icon: CreditCard, label: 'Payments', roles: ['admin', 'finance_manager'] },
+  { to: '/expenses', icon: Receipt, label: 'Expenses', roles: ['admin', 'finance_manager'] },
   { to: '/hr', icon: UserCog, label: 'HR', roles: ['admin', 'hr_manager'] },
   { to: '/reports', icon: BarChart3, label: 'Reports', roles: ['admin'] },
 ];
@@ -113,6 +117,7 @@ export default function AppLayout({ children, role = 'admin' }: { children: Reac
             {roleLabel && <span className="status-badge bg-info/10 text-info text-[10px]">{roleLabel}</span>}
           </div>
           <div className="flex items-center gap-2">
+            <NotificationsPanel />
             <NavLink to="/settings" className="p-1.5 rounded-md hover:bg-muted text-muted-foreground"><Settings className="w-4 h-4" /></NavLink>
             <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
               <span className="text-xs font-medium text-primary-foreground">
