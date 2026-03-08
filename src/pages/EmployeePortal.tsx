@@ -1,13 +1,12 @@
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { usePerformanceReviews, useEmployeeDocuments, useLeaveRequests, useUpsertLeaveRequest, useUploadDocument, useEmployees } from '@/hooks/useCrmData';
-import { Star, FileText, Clock, Check, X, Download, Plus, Upload } from 'lucide-react';
+import { usePerformanceReviews, useEmployeeDocuments, useLeaveRequests, useUpsertLeaveRequest, useEmployees } from '@/hooks/useCrmData';
+import { Star, FileText, Clock, Check, X, Download, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { LeaveRequestFormDialog } from '@/components/forms/LeaveRequestFormDialog';
-import { DocumentUploadDialog } from '@/components/forms/DocumentUploadDialog';
 
 const leaveStatusIcon: Record<string, any> = { pending: Clock, approved: Check, rejected: X };
 const leaveStatusStyle: Record<string, string> = {
