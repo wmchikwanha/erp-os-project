@@ -101,6 +101,7 @@ function ProtectedRoutes() {
       <AppLayout role="employee">
         <Routes>
           <Route path="/" element={<EmployeePortal />} />
+          <Route path="/settings" element={<Settings />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AppLayout>
