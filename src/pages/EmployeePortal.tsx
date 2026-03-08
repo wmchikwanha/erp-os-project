@@ -37,7 +37,7 @@ export default function EmployeePortal() {
   // Filter to only show current employee's data
   const myLeaveRequests = myEmployee ? leaveRequests.filter((lr: any) => lr.employee_id === myEmployee.id) : leaveRequests.filter((lr: any) => lr.user_id === user?.id);
   const myDocuments = myEmployee ? documents.filter((d: any) => d.employee_id === myEmployee.id) : documents;
-  const myReviews = myEmployee ? reviews.filter((r: any) => r.employee_id === myEmployee.id) : reviews;
+  const myReviews = myEmployee ? reviews.filter((r: any) => r.employee_id === myEmployee.id) : [];
 
   const handleDownload = async (filePath: string) => {
     const { data } = await supabase.storage.from('employee-documents').createSignedUrl(filePath, 60);
