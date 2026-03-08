@@ -325,7 +325,7 @@ export function useUpsertLeaveRequest() {
   const qc = useQueryClient();
   const { user } = useAuth();
   return useMutation({
-    mutationFn: async (lr: { id?: string; employee_id?: string | null; type?: string; start_date: string; end_date: string; status?: string }) => {
+    mutationFn: async (lr: { id?: string; employee_id?: string | null; type?: string; start_date: string; end_date: string; status?: string; reason?: string }) => {
       const payload = { ...lr, user_id: user!.id };
       if (lr.id) {
         const { error } = await supabase.from('leave_requests').update(payload).eq('id', lr.id);
@@ -897,6 +897,73 @@ export function useLogConsumption() {
       }
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['inventory_consumption'] }); qc.invalidateQueries({ queryKey: ['products'] }); toast.success('Consumption logged'); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+// ─── CSV Bulk Imports ───
+
+export function useBulkImportContacts() {
+  const qc = useQueryClient();
+  const { user } = useAuth();
+  return useMutation({
+    mutationFn: async (rows: Record<string, string>[]) => {
+      const payload = rows.map(r => ({
+        name: r.name || 'Unnamed',
+        email: r.email || null,
+        phone: r.phone || null,
+        company: r.company || null,
+        type: r.type || 'lead',
+        status: r.status || 'active',
+        user_id: user!.id,
+      }));
+      const { error } = await supabase.from('contacts').insert(payload);
+      if (error) throw error;
+      return payload.length;
+    },
+    onSuccess: (count) => { qc.invalidateQueries({ queryKey: ['contacts'] }); toast.success(`${count} contacts imported`); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export function useBulkImportProducts() {
+  const qc = useQueryClient();
+  const { user } = useAuth();
+  return useMutation({
+    mutationFn: async (rows: Record<string, string>[]) => {
+      const payload = rows.map(r => ({
+        name: r.name || 'Unnamed',
+        sku: r.sku || null,
+        description: r.description || null,
+        unit_price: parseFloat(r.unit_price || '0') || 0,
+        stock_quantity: parseInt(r.stock_quantity || '0') || 0,
+        reorder_level: parseInt(r.reorder_level || '0') || 0,
+        user_id: user!.id,
+      }));
+      const { error } = await supabase.from('products').insert(payload);
+      if (error) throw error;
+      return payload.length;
+    },
+    onSuccess: (count) => { qc.invalidateQueries({ queryKey: ['products'] }); toast.success(`${count} products imported`); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export function useBulkImportInvitations() {
+  const qc = useQueryClient();
+  const { user } = useAuth();
+  return useMutation({
+    mutationFn: async (rows: Record<string, string>[]) => {
+      const payload = rows.map(r => ({
+        email: r.email,
+        role: (r.role || 'employee') as any,
+        invited_by: user!.id,
+      }));
+      const { error } = await supabase.from('invitations').insert(payload);
+      if (error) throw error;
+      return payload.length;
+    },
+    onSuccess: (count) => { qc.invalidateQueries({ queryKey: ['invitations'] }); toast.success(`${count} invitations created`); },
     onError: (e: Error) => toast.error(e.message),
   });
 }

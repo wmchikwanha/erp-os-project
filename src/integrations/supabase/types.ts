@@ -641,6 +641,7 @@ export type Database = {
           employee_id: string | null
           end_date: string
           id: string
+          reason: string | null
           start_date: string
           status: string
           type: string
@@ -652,6 +653,7 @@ export type Database = {
           employee_id?: string | null
           end_date: string
           id?: string
+          reason?: string | null
           start_date: string
           status?: string
           type?: string
@@ -663,6 +665,7 @@ export type Database = {
           employee_id?: string | null
           end_date?: string
           id?: string
+          reason?: string | null
           start_date?: string
           status?: string
           type?: string

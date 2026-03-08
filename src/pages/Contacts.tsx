@@ -1,11 +1,12 @@
 import { useState, useMemo } from 'react';
-import { Search, Plus, Pencil, Trash2 } from 'lucide-react';
-import { useContacts, useUpsertContact, useDeleteContact } from '@/hooks/useCrmData';
+import { Search, Plus, Pencil, Trash2, Upload } from 'lucide-react';
+import { useContacts, useUpsertContact, useDeleteContact, useBulkImportContacts } from '@/hooks/useCrmData';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ContactFormDialog } from '@/components/forms/ContactFormDialog';
 import { DeleteConfirmDialog } from '@/components/forms/DeleteConfirmDialog';
+import { CsvImportDialog } from '@/components/forms/CsvImportDialog';
 
 const typeColors: Record<string, string> = {
   lead: 'bg-warning/10 text-warning',
@@ -18,11 +19,13 @@ export default function Contacts() {
   const { data: contacts = [], isLoading } = useContacts();
   const upsert = useUpsertContact();
   const remove = useDeleteContact();
+  const bulkImport = useBulkImportContacts();
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [formOpen, setFormOpen] = useState(false);
   const [editItem, setEditItem] = useState<any>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [csvOpen, setCsvOpen] = useState(false);
 
   const filtered = useMemo(() => {
     return contacts.filter((c) => {
@@ -47,7 +50,8 @@ export default function Contacts() {
               <button key={t} onClick={() => setTypeFilter(t)} className={cn('px-2.5 py-1 text-xs font-medium rounded capitalize transition-colors', typeFilter === t ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}>{t}</button>
             ))}
           </div>
-          <Button size="sm" className="ml-auto sm:ml-0" onClick={() => { setEditItem(null); setFormOpen(true); }}><Plus className="w-4 h-4 mr-1" />Add</Button>
+          <Button size="sm" variant="outline" className="ml-auto sm:ml-0" onClick={() => setCsvOpen(true)}><Upload className="w-4 h-4 mr-1" />Import CSV</Button>
+          <Button size="sm" onClick={() => { setEditItem(null); setFormOpen(true); }}><Plus className="w-4 h-4 mr-1" />Add</Button>
         </div>
       </div>
 
@@ -102,6 +106,7 @@ export default function Contacts() {
 
       <ContactFormDialog open={formOpen} onOpenChange={setFormOpen} initialData={editItem} loading={upsert.isPending} onSubmit={(data) => { upsert.mutate(data, { onSuccess: () => setFormOpen(false) }); }} />
       <DeleteConfirmDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)} loading={remove.isPending} onConfirm={() => { if (deleteId) remove.mutate(deleteId, { onSuccess: () => setDeleteId(null) }); }} title="Delete Contact" />
+      <CsvImportDialog open={csvOpen} onOpenChange={setCsvOpen} title="Import Contacts CSV" expectedColumns={['name', 'email', 'phone', 'company', 'type', 'status']} loading={bulkImport.isPending} onImport={(rows) => { bulkImport.mutate(rows, { onSuccess: () => setCsvOpen(false) }); }} />
     </div>
   );
 }

@@ -1,13 +1,12 @@
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { usePerformanceReviews, useEmployeeDocuments, useLeaveRequests, useUpsertLeaveRequest, useUploadDocument, useEmployees } from '@/hooks/useCrmData';
-import { Star, FileText, Clock, Check, X, Download, Plus, Upload } from 'lucide-react';
+import { usePerformanceReviews, useEmployeeDocuments, useLeaveRequests, useUpsertLeaveRequest, useEmployees } from '@/hooks/useCrmData';
+import { Star, FileText, Clock, Check, X, Download, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { LeaveRequestFormDialog } from '@/components/forms/LeaveRequestFormDialog';
-import { DocumentUploadDialog } from '@/components/forms/DocumentUploadDialog';
 
 const leaveStatusIcon: Record<string, any> = { pending: Clock, approved: Check, rejected: X };
 const leaveStatusStyle: Record<string, string> = {
@@ -23,10 +22,8 @@ export default function EmployeePortal() {
   const { data: documents = [], isLoading: ld } = useEmployeeDocuments();
   const { data: leaveRequests = [], isLoading: ll } = useLeaveRequests();
   const upsertLeave = useUpsertLeaveRequest();
-  const uploadDoc = useUploadDocument();
 
   const [leaveFormOpen, setLeaveFormOpen] = useState(false);
-  const [docUploadOpen, setDocUploadOpen] = useState(false);
 
   // Find the employee record linked to this user
   const myEmployee = employees.find((e: any) => e.user_id === user?.id || e.email === user?.email);
@@ -37,27 +34,20 @@ export default function EmployeePortal() {
   // Filter to only show current employee's data
   const myLeaveRequests = myEmployee ? leaveRequests.filter((lr: any) => lr.employee_id === myEmployee.id) : leaveRequests.filter((lr: any) => lr.user_id === user?.id);
   const myDocuments = myEmployee ? documents.filter((d: any) => d.employee_id === myEmployee.id) : documents;
-  const myReviews = myEmployee ? reviews.filter((r: any) => r.employee_id === myEmployee.id) : reviews;
+  const myReviews = myEmployee ? reviews.filter((r: any) => r.employee_id === myEmployee.id) : [];
 
   const handleDownload = async (filePath: string) => {
     const { data } = await supabase.storage.from('employee-documents').createSignedUrl(filePath, 60);
     if (data?.signedUrl) window.open(data.signedUrl, '_blank');
   };
 
-  const handleLeaveSubmit = (data: { type: string; start_date: string; end_date: string }) => {
+  const handleLeaveSubmit = (data: { type: string; start_date: string; end_date: string; reason?: string }) => {
     upsertLeave.mutate(
       { ...data, employee_id: myEmployee?.id || null },
       { onSuccess: () => setLeaveFormOpen(false) }
     );
   };
 
-  const handleDocUpload = (data: { file: File; name: string; category: string; expiry_date?: string; notes?: string }) => {
-    if (!myEmployee) return;
-    uploadDoc.mutate(
-      { employeeId: myEmployee.id, ...data },
-      { onSuccess: () => setDocUploadOpen(false) }
-    );
-  };
 
   return (
     <div className="space-y-6 animate-slide-in max-w-3xl">
@@ -108,13 +98,10 @@ export default function EmployeePortal() {
           </div>
         </TabsContent>
 
-        {/* Documents */}
+        {/* Documents (read-only for employees) */}
         <TabsContent value="documents">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold">My Documents</h3>
-            {myEmployee && (
-              <Button size="sm" variant="outline" onClick={() => setDocUploadOpen(true)}><Upload className="w-4 h-4 mr-1" />Upload</Button>
-            )}
           </div>
           <div className="bg-card border border-border rounded-lg divide-y divide-border">
           {myDocuments.map((doc: any) => (
@@ -161,7 +148,6 @@ export default function EmployeePortal() {
       </Tabs>
 
       <LeaveRequestFormDialog open={leaveFormOpen} onOpenChange={setLeaveFormOpen} loading={upsertLeave.isPending} onSubmit={handleLeaveSubmit} />
-      <DocumentUploadDialog open={docUploadOpen} onOpenChange={setDocUploadOpen} loading={uploadDoc.isPending} onSubmit={handleDocUpload} />
     </div>
   );
 }

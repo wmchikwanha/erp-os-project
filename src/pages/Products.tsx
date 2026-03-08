@@ -1,25 +1,31 @@
 import { useState } from 'react';
-import { useProducts, useUpsertProduct, useDeleteProduct } from '@/hooks/useCrmData';
-import { AlertTriangle, Plus, Pencil, Trash2 } from 'lucide-react';
+import { useProducts, useUpsertProduct, useDeleteProduct, useBulkImportProducts } from '@/hooks/useCrmData';
+import { AlertTriangle, Plus, Pencil, Trash2, Upload } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ProductFormDialog } from '@/components/forms/ProductFormDialog';
 import { DeleteConfirmDialog } from '@/components/forms/DeleteConfirmDialog';
+import { CsvImportDialog } from '@/components/forms/CsvImportDialog';
 
 export default function Products() {
   const { data: products = [], isLoading } = useProducts();
   const upsert = useUpsertProduct();
   const remove = useDeleteProduct();
+  const bulkImport = useBulkImportProducts();
   const [formOpen, setFormOpen] = useState(false);
   const [editItem, setEditItem] = useState<any>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [csvOpen, setCsvOpen] = useState(false);
 
   if (isLoading) return <div className="py-12 text-center text-muted-foreground text-sm">Loading products...</div>;
 
   return (
     <div className="space-y-4 animate-slide-in">
       <div className="flex justify-end">
+      <div className="flex gap-2 justify-end">
+        <Button size="sm" variant="outline" onClick={() => setCsvOpen(true)}><Upload className="w-4 h-4 mr-1" />Import CSV</Button>
         <Button size="sm" onClick={() => { setEditItem(null); setFormOpen(true); }}><Plus className="w-4 h-4 mr-1" />Add Product</Button>
+      </div>
       </div>
       <div className="bg-card border border-border rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
@@ -70,6 +76,7 @@ export default function Products() {
 
       <ProductFormDialog open={formOpen} onOpenChange={setFormOpen} initialData={editItem} loading={upsert.isPending} onSubmit={(data) => { upsert.mutate(data, { onSuccess: () => setFormOpen(false) }); }} />
       <DeleteConfirmDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)} loading={remove.isPending} onConfirm={() => { if (deleteId) remove.mutate(deleteId, { onSuccess: () => setDeleteId(null) }); }} title="Delete Product" />
+      <CsvImportDialog open={csvOpen} onOpenChange={setCsvOpen} title="Import Products CSV" expectedColumns={['name', 'sku', 'description', 'unit_price', 'stock_quantity', 'reorder_level']} loading={bulkImport.isPending} onImport={(rows) => { bulkImport.mutate(rows, { onSuccess: () => setCsvOpen(false) }); }} />
     </div>
   );
 }

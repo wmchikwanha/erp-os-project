@@ -23,6 +23,7 @@ import Consumption from "./pages/Consumption";
 import EmployeePortal from "./pages/EmployeePortal";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -86,6 +87,7 @@ function ProtectedRoutes() {
       <AppLayout role={role}>
         <Routes>
           <Route path="/" element={<EmployeePortal />} />
+          <Route path="/settings" element={<Settings />} />
           {routes.map(r => <Route key={r.path} path={r.path} element={r.element} />)}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
@@ -99,6 +101,7 @@ function ProtectedRoutes() {
       <AppLayout role="employee">
         <Routes>
           <Route path="/" element={<EmployeePortal />} />
+          <Route path="/settings" element={<Settings />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AppLayout>
@@ -123,6 +126,7 @@ function ProtectedRoutes() {
         <Route path="/invoices" element={<Invoices />} />
         <Route path="/hr" element={<HRPage />} />
         <Route path="/reports" element={<Reports />} />
+        <Route path="/settings" element={<Settings />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AppLayout>

@@ -113,7 +113,7 @@ export default function AppLayout({ children, role = 'admin' }: { children: Reac
             {roleLabel && <span className="status-badge bg-info/10 text-info text-[10px]">{roleLabel}</span>}
           </div>
           <div className="flex items-center gap-2">
-            <button className="p-1.5 rounded-md hover:bg-muted text-muted-foreground"><Settings className="w-4 h-4" /></button>
+            <NavLink to="/settings" className="p-1.5 rounded-md hover:bg-muted text-muted-foreground"><Settings className="w-4 h-4" /></NavLink>
             <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
               <span className="text-xs font-medium text-primary-foreground">
                 {user?.user_metadata?.full_name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2) || user?.email?.charAt(0).toUpperCase() || '?'}

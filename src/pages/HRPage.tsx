@@ -4,15 +4,17 @@ import {
   useLeaveRequests, useUpdateLeaveStatus,
   usePerformanceReviews, useUpsertReview, useDeleteReview,
   useEmployeeDocuments, useUploadDocument, useDeleteDocument,
+  useBulkImportInvitations,
 } from '@/hooks/useCrmData';
 import { cn } from '@/lib/utils';
-import { Check, X, Clock, Plus, Pencil, Trash2, Star, FileText, Download } from 'lucide-react';
+import { Check, X, Clock, Plus, Pencil, Trash2, Star, FileText, Download, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EmployeeFormDialog } from '@/components/forms/EmployeeFormDialog';
 import { DeleteConfirmDialog } from '@/components/forms/DeleteConfirmDialog';
 import { ReviewFormDialog } from '@/components/forms/ReviewFormDialog';
 import { DocumentUploadDialog } from '@/components/forms/DocumentUploadDialog';
 import { CredentialsDialog } from '@/components/forms/CredentialsDialog';
+import { CsvImportDialog } from '@/components/forms/CsvImportDialog';
 import { supabase } from '@/integrations/supabase/client';
 
 const leaveStatusIcon: Record<string, any> = { pending: Clock, approved: Check, rejected: X };
@@ -37,6 +39,7 @@ export default function HRPage() {
   const removeReview = useDeleteReview();
   const uploadDoc = useUploadDocument();
   const removeDoc = useDeleteDocument();
+  const bulkInvite = useBulkImportInvitations();
 
   const [activeTab, setActiveTab] = useState<typeof tabs[number]>('Directory');
   const [formOpen, setFormOpen] = useState(false);
@@ -49,6 +52,7 @@ export default function HRPage() {
   const [docEmployeeId, setDocEmployeeId] = useState<string | null>(null);
   const [deleteDocData, setDeleteDocData] = useState<{ id: string; filePath: string } | null>(null);
   const [credentialsData, setCredentialsData] = useState<{ email: string; password: string } | null>(null);
+  const [csvInviteOpen, setCsvInviteOpen] = useState(false);
 
   const loading = loadingEmp || loadingLR || loadingRev || loadingDoc;
   if (loading) return <div className="py-12 text-center text-muted-foreground text-sm">Loading HR data...</div>;
@@ -93,7 +97,10 @@ export default function HRPage() {
         <div>
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold">Employee Directory</h3>
-            <Button size="sm" onClick={() => { setEditItem(null); setFormOpen(true); }}><Plus className="w-4 h-4 mr-1" />Add Employee</Button>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => setCsvInviteOpen(true)}><Upload className="w-4 h-4 mr-1" />Import Invitations CSV</Button>
+              <Button size="sm" onClick={() => { setEditItem(null); setFormOpen(true); }}><Plus className="w-4 h-4 mr-1" />Add Employee</Button>
+            </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {employees.map((emp) => (
@@ -260,6 +267,7 @@ export default function HRPage() {
       <DocumentUploadDialog open={docUploadOpen} onOpenChange={setDocUploadOpen} loading={uploadDoc.isPending} onSubmit={(data) => { if (docEmployeeId) uploadDoc.mutate({ employeeId: docEmployeeId, ...data }, { onSuccess: () => setDocUploadOpen(false) }); }} />
       <DeleteConfirmDialog open={!!deleteDocData} onOpenChange={() => setDeleteDocData(null)} loading={removeDoc.isPending} onConfirm={() => { if (deleteDocData) removeDoc.mutate(deleteDocData, { onSuccess: () => setDeleteDocData(null) }); }} title="Delete Document" />
       <CredentialsDialog open={!!credentialsData} onOpenChange={() => setCredentialsData(null)} email={credentialsData?.email ?? ''} password={credentialsData?.password ?? ''} />
+      <CsvImportDialog open={csvInviteOpen} onOpenChange={setCsvInviteOpen} title="Import Invitations CSV" expectedColumns={['email', 'role']} loading={bulkInvite.isPending} onImport={(rows) => { bulkInvite.mutate(rows, { onSuccess: () => setCsvInviteOpen(false) }); }} />
     </div>
   );
 }
