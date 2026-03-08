@@ -12,6 +12,7 @@ import Deals from "./pages/Deals";
 import Activities from "./pages/Activities";
 import Procurement from "./pages/Procurement";
 import Invoices from "./pages/Invoices";
+import Payments from "./pages/Payments";
 import HRPage from "./pages/HRPage";
 import Reports from "./pages/Reports";
 import Projects from "./pages/Projects";
@@ -20,6 +21,8 @@ import Scheduling from "./pages/Scheduling";
 import EquipmentCheckouts from "./pages/EquipmentCheckouts";
 import Maintenance from "./pages/Maintenance";
 import Consumption from "./pages/Consumption";
+import Timesheets from "./pages/Timesheets";
+import Expenses from "./pages/Expenses";
 import EmployeePortal from "./pages/EmployeePortal";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
@@ -57,8 +60,13 @@ const DEPT_ROUTE_MAP: Record<string, { path: string; element: React.ReactNode }[
     { path: '/projects', element: <Projects /> },
     { path: '/sites', element: <Sites /> },
     { path: '/scheduling', element: <Scheduling /> },
+    { path: '/timesheets', element: <Timesheets /> },
   ],
-  finance_manager: [{ path: '/invoices', element: <Invoices /> }],
+  finance_manager: [
+    { path: '/invoices', element: <Invoices /> },
+    { path: '/payments', element: <Payments /> },
+    { path: '/expenses', element: <Expenses /> },
+  ],
 };
 
 function ProtectedRoutes() {
@@ -76,11 +84,8 @@ function ProtectedRoutes() {
   }
 
   if (!session) return <Navigate to="/auth" replace />;
-
-  // No role assigned — pending approval
   if (!role) return <PendingApproval />;
 
-  // Department managers: employee portal + their department route
   if (isDepartmentManager(role)) {
     const routes = DEPT_ROUTE_MAP[role] || [];
     return (
@@ -95,7 +100,6 @@ function ProtectedRoutes() {
     );
   }
 
-  // Employee: portal only
   if (role === 'employee') {
     return (
       <AppLayout role="employee">
@@ -124,6 +128,9 @@ function ProtectedRoutes() {
         <Route path="/activities" element={<Activities />} />
         <Route path="/procurement" element={<Procurement />} />
         <Route path="/invoices" element={<Invoices />} />
+        <Route path="/payments" element={<Payments />} />
+        <Route path="/timesheets" element={<Timesheets />} />
+        <Route path="/expenses" element={<Expenses />} />
         <Route path="/hr" element={<HRPage />} />
         <Route path="/reports" element={<Reports />} />
         <Route path="/settings" element={<Settings />} />
