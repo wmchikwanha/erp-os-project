@@ -108,13 +108,10 @@ export default function EmployeePortal() {
           </div>
         </TabsContent>
 
-        {/* Documents */}
+        {/* Documents (read-only for employees) */}
         <TabsContent value="documents">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold">My Documents</h3>
-            {myEmployee && (
-              <Button size="sm" variant="outline" onClick={() => setDocUploadOpen(true)}><Upload className="w-4 h-4 mr-1" />Upload</Button>
-            )}
           </div>
           <div className="bg-card border border-border rounded-lg divide-y divide-border">
           {myDocuments.map((doc: any) => (

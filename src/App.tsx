@@ -126,6 +126,7 @@ function ProtectedRoutes() {
         <Route path="/invoices" element={<Invoices />} />
         <Route path="/hr" element={<HRPage />} />
         <Route path="/reports" element={<Reports />} />
+        <Route path="/settings" element={<Settings />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AppLayout>

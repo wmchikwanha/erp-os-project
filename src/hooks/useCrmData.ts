@@ -325,7 +325,7 @@ export function useUpsertLeaveRequest() {
   const qc = useQueryClient();
   const { user } = useAuth();
   return useMutation({
-    mutationFn: async (lr: { id?: string; employee_id?: string | null; type?: string; start_date: string; end_date: string; status?: string }) => {
+    mutationFn: async (lr: { id?: string; employee_id?: string | null; type?: string; start_date: string; end_date: string; status?: string; reason?: string }) => {
       const payload = { ...lr, user_id: user!.id };
       if (lr.id) {
         const { error } = await supabase.from('leave_requests').update(payload).eq('id', lr.id);
