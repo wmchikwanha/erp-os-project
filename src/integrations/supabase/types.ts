@@ -479,6 +479,76 @@ export type Database = {
           },
         ]
       }
+      expenses: {
+        Row: {
+          amount: number
+          approved_by: string | null
+          category: string
+          created_at: string
+          description: string | null
+          employee_id: string | null
+          expense_date: string
+          id: string
+          project_id: string | null
+          receipt_path: string | null
+          site_id: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          approved_by?: string | null
+          category?: string
+          created_at?: string
+          description?: string | null
+          employee_id?: string | null
+          expense_date?: string
+          id?: string
+          project_id?: string | null
+          receipt_path?: string | null
+          site_id?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          approved_by?: string | null
+          category?: string
+          created_at?: string
+          description?: string | null
+          employee_id?: string | null
+          expense_date?: string
+          id?: string
+          project_id?: string | null
+          receipt_path?: string | null
+          site_id?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expenses_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expenses_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expenses_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       inventory_consumption: {
         Row: {
           consumed_by: string | null
@@ -1130,6 +1200,70 @@ export type Database = {
             columns: ["manager_id"]
             isOneToOne: false
             referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      timesheets: {
+        Row: {
+          approved_by: string | null
+          created_at: string
+          description: string | null
+          employee_id: string | null
+          hours_worked: number
+          id: string
+          project_id: string | null
+          site_id: string | null
+          status: string
+          user_id: string
+          work_date: string
+        }
+        Insert: {
+          approved_by?: string | null
+          created_at?: string
+          description?: string | null
+          employee_id?: string | null
+          hours_worked?: number
+          id?: string
+          project_id?: string | null
+          site_id?: string | null
+          status?: string
+          user_id: string
+          work_date: string
+        }
+        Update: {
+          approved_by?: string | null
+          created_at?: string
+          description?: string | null
+          employee_id?: string | null
+          hours_worked?: number
+          id?: string
+          project_id?: string | null
+          site_id?: string | null
+          status?: string
+          user_id?: string
+          work_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timesheets_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timesheets_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timesheets_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
             referencedColumns: ["id"]
           },
         ]
