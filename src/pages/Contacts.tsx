@@ -50,7 +50,8 @@ export default function Contacts() {
               <button key={t} onClick={() => setTypeFilter(t)} className={cn('px-2.5 py-1 text-xs font-medium rounded capitalize transition-colors', typeFilter === t ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}>{t}</button>
             ))}
           </div>
-          <Button size="sm" className="ml-auto sm:ml-0" onClick={() => { setEditItem(null); setFormOpen(true); }}><Plus className="w-4 h-4 mr-1" />Add</Button>
+          <Button size="sm" variant="outline" className="ml-auto sm:ml-0" onClick={() => setCsvOpen(true)}><Upload className="w-4 h-4 mr-1" />Import CSV</Button>
+          <Button size="sm" onClick={() => { setEditItem(null); setFormOpen(true); }}><Plus className="w-4 h-4 mr-1" />Add</Button>
         </div>
       </div>
 
