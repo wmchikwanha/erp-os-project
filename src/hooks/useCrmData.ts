@@ -1090,20 +1090,3 @@ export function useUpsertExpense() {
     onError: (e: Error) => toast.error(e.message),
   });
 }
-  const qc = useQueryClient();
-  const { user } = useAuth();
-  return useMutation({
-    mutationFn: async (rows: Record<string, string>[]) => {
-      const payload = rows.map(r => ({
-        email: r.email,
-        role: (r.role || 'employee') as any,
-        invited_by: user!.id,
-      }));
-      const { error } = await supabase.from('invitations').insert(payload);
-      if (error) throw error;
-      return payload.length;
-    },
-    onSuccess: (count) => { qc.invalidateQueries({ queryKey: ['invitations'] }); toast.success(`${count} invitations created`); },
-    onError: (e: Error) => toast.error(e.message),
-  });
-}
