@@ -76,6 +76,7 @@ export default function Products() {
 
       <ProductFormDialog open={formOpen} onOpenChange={setFormOpen} initialData={editItem} loading={upsert.isPending} onSubmit={(data) => { upsert.mutate(data, { onSuccess: () => setFormOpen(false) }); }} />
       <DeleteConfirmDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)} loading={remove.isPending} onConfirm={() => { if (deleteId) remove.mutate(deleteId, { onSuccess: () => setDeleteId(null) }); }} title="Delete Product" />
+      <CsvImportDialog open={csvOpen} onOpenChange={setCsvOpen} title="Import Products CSV" expectedColumns={['name', 'sku', 'description', 'unit_price', 'stock_quantity', 'reorder_level']} loading={bulkImport.isPending} onImport={(rows) => { bulkImport.mutate(rows, { onSuccess: () => setCsvOpen(false) }); }} />
     </div>
   );
 }
