@@ -1,11 +1,12 @@
 import { useState, useMemo } from 'react';
-import { Search, Plus, Pencil, Trash2 } from 'lucide-react';
-import { useContacts, useUpsertContact, useDeleteContact } from '@/hooks/useCrmData';
+import { Search, Plus, Pencil, Trash2, Upload } from 'lucide-react';
+import { useContacts, useUpsertContact, useDeleteContact, useBulkImportContacts } from '@/hooks/useCrmData';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ContactFormDialog } from '@/components/forms/ContactFormDialog';
 import { DeleteConfirmDialog } from '@/components/forms/DeleteConfirmDialog';
+import { CsvImportDialog } from '@/components/forms/CsvImportDialog';
 
 const typeColors: Record<string, string> = {
   lead: 'bg-warning/10 text-warning',
