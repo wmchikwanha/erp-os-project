@@ -44,7 +44,7 @@ export default function EmployeePortal() {
     if (data?.signedUrl) window.open(data.signedUrl, '_blank');
   };
 
-  const handleLeaveSubmit = (data: { type: string; start_date: string; end_date: string }) => {
+  const handleLeaveSubmit = (data: { type: string; start_date: string; end_date: string; reason?: string }) => {
     upsertLeave.mutate(
       { ...data, employee_id: myEmployee?.id || null },
       { onSuccess: () => setLeaveFormOpen(false) }
