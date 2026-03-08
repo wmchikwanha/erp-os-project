@@ -97,7 +97,10 @@ export default function HRPage() {
         <div>
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold">Employee Directory</h3>
-            <Button size="sm" onClick={() => { setEditItem(null); setFormOpen(true); }}><Plus className="w-4 h-4 mr-1" />Add Employee</Button>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => setCsvInviteOpen(true)}><Upload className="w-4 h-4 mr-1" />Import Invitations CSV</Button>
+              <Button size="sm" onClick={() => { setEditItem(null); setFormOpen(true); }}><Plus className="w-4 h-4 mr-1" />Add Employee</Button>
+            </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {employees.map((emp) => (
