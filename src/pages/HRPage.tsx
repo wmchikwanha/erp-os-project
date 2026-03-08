@@ -267,6 +267,7 @@ export default function HRPage() {
       <DocumentUploadDialog open={docUploadOpen} onOpenChange={setDocUploadOpen} loading={uploadDoc.isPending} onSubmit={(data) => { if (docEmployeeId) uploadDoc.mutate({ employeeId: docEmployeeId, ...data }, { onSuccess: () => setDocUploadOpen(false) }); }} />
       <DeleteConfirmDialog open={!!deleteDocData} onOpenChange={() => setDeleteDocData(null)} loading={removeDoc.isPending} onConfirm={() => { if (deleteDocData) removeDoc.mutate(deleteDocData, { onSuccess: () => setDeleteDocData(null) }); }} title="Delete Document" />
       <CredentialsDialog open={!!credentialsData} onOpenChange={() => setCredentialsData(null)} email={credentialsData?.email ?? ''} password={credentialsData?.password ?? ''} />
+      <CsvImportDialog open={csvInviteOpen} onOpenChange={setCsvInviteOpen} title="Import Invitations CSV" expectedColumns={['email', 'role']} loading={bulkInvite.isPending} onImport={(rows) => { bulkInvite.mutate(rows, { onSuccess: () => setCsvInviteOpen(false) }); }} />
     </div>
   );
 }
