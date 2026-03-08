@@ -81,8 +81,10 @@ export type Database = {
           name: string
           notes: string | null
           po_id: string | null
+          project_id: string | null
           purchase_date: string | null
           purchase_price: number | null
+          site_id: string | null
           updated_at: string
           user_id: string
         }
@@ -98,8 +100,10 @@ export type Database = {
           name: string
           notes?: string | null
           po_id?: string | null
+          project_id?: string | null
           purchase_date?: string | null
           purchase_price?: number | null
+          site_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -115,8 +119,10 @@ export type Database = {
           name?: string
           notes?: string | null
           po_id?: string | null
+          project_id?: string | null
           purchase_date?: string | null
           purchase_price?: number | null
+          site_id?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -133,6 +139,20 @@ export type Database = {
             columns: ["po_id"]
             isOneToOne: false
             referencedRelation: "purchase_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assets_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assets_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
             referencedColumns: ["id"]
           },
         ]
@@ -357,6 +377,176 @@ export type Database = {
           },
         ]
       }
+      equipment_checkouts: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by_worker: boolean
+          actual_return_date: string | null
+          asset_id: string
+          checked_out_by: string | null
+          checked_out_to: string
+          checkout_condition: string | null
+          checkout_date: string
+          checkout_notes: string | null
+          created_at: string
+          expected_return_date: string | null
+          id: string
+          project_id: string | null
+          return_condition: string | null
+          return_notes: string | null
+          site_id: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by_worker?: boolean
+          actual_return_date?: string | null
+          asset_id: string
+          checked_out_by?: string | null
+          checked_out_to: string
+          checkout_condition?: string | null
+          checkout_date?: string
+          checkout_notes?: string | null
+          created_at?: string
+          expected_return_date?: string | null
+          id?: string
+          project_id?: string | null
+          return_condition?: string | null
+          return_notes?: string | null
+          site_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by_worker?: boolean
+          actual_return_date?: string | null
+          asset_id?: string
+          checked_out_by?: string | null
+          checked_out_to?: string
+          checkout_condition?: string | null
+          checkout_date?: string
+          checkout_notes?: string | null
+          created_at?: string
+          expected_return_date?: string | null
+          id?: string
+          project_id?: string | null
+          return_condition?: string | null
+          return_notes?: string | null
+          site_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "equipment_checkouts_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "equipment_checkouts_checked_out_by_fkey"
+            columns: ["checked_out_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "equipment_checkouts_checked_out_to_fkey"
+            columns: ["checked_out_to"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "equipment_checkouts_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "equipment_checkouts_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inventory_consumption: {
+        Row: {
+          consumed_by: string | null
+          consumption_date: string
+          created_at: string
+          id: string
+          notes: string | null
+          product_id: string
+          project_id: string | null
+          quantity: number
+          site_id: string | null
+          user_id: string
+        }
+        Insert: {
+          consumed_by?: string | null
+          consumption_date?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          product_id: string
+          project_id?: string | null
+          quantity?: number
+          site_id?: string | null
+          user_id: string
+        }
+        Update: {
+          consumed_by?: string | null
+          consumption_date?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          product_id?: string
+          project_id?: string | null
+          quantity?: number
+          site_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_consumption_consumed_by_fkey"
+            columns: ["consumed_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_consumption_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_consumption_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_consumption_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invitations: {
         Row: {
           accepted_at: string | null
@@ -484,6 +674,62 @@ export type Database = {
             columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      maintenance_logs: {
+        Row: {
+          asset_id: string
+          cost: number | null
+          created_at: string
+          description: string | null
+          downtime_hours: number | null
+          id: string
+          maintenance_type: string
+          next_due_date: string | null
+          notes: string | null
+          performed_by: string | null
+          performed_date: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          asset_id: string
+          cost?: number | null
+          created_at?: string
+          description?: string | null
+          downtime_hours?: number | null
+          id?: string
+          maintenance_type?: string
+          next_due_date?: string | null
+          notes?: string | null
+          performed_by?: string | null
+          performed_date?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          asset_id?: string
+          cost?: number | null
+          created_at?: string
+          description?: string | null
+          downtime_hours?: number | null
+          id?: string
+          maintenance_type?: string
+          next_due_date?: string | null
+          notes?: string | null
+          performed_by?: string | null
+          performed_date?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_logs_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "assets"
             referencedColumns: ["id"]
           },
         ]
@@ -826,6 +1072,65 @@ export type Database = {
           },
         ]
       }
+      sites: {
+        Row: {
+          address: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          end_date: string | null
+          id: string
+          manager_id: string | null
+          name: string
+          notes: string | null
+          start_date: string | null
+          state: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          manager_id?: string | null
+          name: string
+          notes?: string | null
+          start_date?: string | null
+          state?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          manager_id?: string | null
+          name?: string
+          notes?: string | null
+          start_date?: string | null
+          state?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sites_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -846,6 +1151,70 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      work_schedules: {
+        Row: {
+          created_at: string
+          employee_id: string
+          id: string
+          notes: string | null
+          project_id: string | null
+          schedule_date: string
+          shift_end: string | null
+          shift_start: string | null
+          site_id: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          employee_id: string
+          id?: string
+          notes?: string | null
+          project_id?: string | null
+          schedule_date: string
+          shift_end?: string | null
+          shift_start?: string | null
+          site_id?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          employee_id?: string
+          id?: string
+          notes?: string | null
+          project_id?: string | null
+          schedule_date?: string
+          shift_end?: string | null
+          shift_start?: string | null
+          site_id?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "work_schedules_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_schedules_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_schedules_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

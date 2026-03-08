@@ -2,6 +2,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Users, Handshake, CalendarCheck, Package,
   FileText, UserCog, BarChart3, Settings, ChevronLeft, Menu, LogOut, Home, FolderKanban,
+  Building2, CalendarDays, PackageCheck, Wrench, TrendingDown,
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -15,6 +16,11 @@ const ALL_NAV_ITEMS = [
   { to: '/contacts', icon: Users, label: 'Contacts', roles: ['admin'] },
   { to: '/deals', icon: Handshake, label: 'Deals', roles: ['admin'] },
   { to: '/projects', icon: FolderKanban, label: 'Projects', roles: ['admin', 'project_manager'] },
+  { to: '/sites', icon: Building2, label: 'Sites', roles: ['admin', 'project_manager', 'procurement_manager'] },
+  { to: '/scheduling', icon: CalendarDays, label: 'Scheduling', roles: ['admin', 'project_manager'] },
+  { to: '/equipment', icon: PackageCheck, label: 'Equipment', roles: ['admin', 'procurement_manager'] },
+  { to: '/maintenance', icon: Wrench, label: 'Maintenance', roles: ['admin', 'procurement_manager'] },
+  { to: '/consumption', icon: TrendingDown, label: 'Consumption', roles: ['admin', 'procurement_manager'] },
   { to: '/activities', icon: CalendarCheck, label: 'Activities', roles: ['admin'] },
   { to: '/procurement', icon: Package, label: 'Procurement', roles: ['admin', 'procurement_manager'] },
   { to: '/invoices', icon: FileText, label: 'Invoices', roles: ['admin', 'finance_manager'] },

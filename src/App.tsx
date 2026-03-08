@@ -15,6 +15,11 @@ import Invoices from "./pages/Invoices";
 import HRPage from "./pages/HRPage";
 import Reports from "./pages/Reports";
 import Projects from "./pages/Projects";
+import Sites from "./pages/Sites";
+import Scheduling from "./pages/Scheduling";
+import EquipmentCheckouts from "./pages/EquipmentCheckouts";
+import Maintenance from "./pages/Maintenance";
+import Consumption from "./pages/Consumption";
 import EmployeePortal from "./pages/EmployeePortal";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
@@ -38,11 +43,21 @@ function PendingApproval() {
   );
 }
 
-const DEPT_ROUTE_MAP: Record<string, { path: string; element: React.ReactNode }> = {
-  procurement_manager: { path: '/procurement', element: <Procurement /> },
-  hr_manager: { path: '/hr', element: <HRPage /> },
-  project_manager: { path: '/projects', element: <Projects /> },
-  finance_manager: { path: '/invoices', element: <Invoices /> },
+const DEPT_ROUTE_MAP: Record<string, { path: string; element: React.ReactNode }[]> = {
+  procurement_manager: [
+    { path: '/procurement', element: <Procurement /> },
+    { path: '/sites', element: <Sites /> },
+    { path: '/equipment', element: <EquipmentCheckouts /> },
+    { path: '/maintenance', element: <Maintenance /> },
+    { path: '/consumption', element: <Consumption /> },
+  ],
+  hr_manager: [{ path: '/hr', element: <HRPage /> }],
+  project_manager: [
+    { path: '/projects', element: <Projects /> },
+    { path: '/sites', element: <Sites /> },
+    { path: '/scheduling', element: <Scheduling /> },
+  ],
+  finance_manager: [{ path: '/invoices', element: <Invoices /> }],
 };
 
 function ProtectedRoutes() {
@@ -66,12 +81,12 @@ function ProtectedRoutes() {
 
   // Department managers: employee portal + their department route
   if (isDepartmentManager(role)) {
-    const dept = DEPT_ROUTE_MAP[role];
+    const routes = DEPT_ROUTE_MAP[role] || [];
     return (
       <AppLayout role={role}>
         <Routes>
           <Route path="/" element={<EmployeePortal />} />
-          {dept && <Route path={dept.path} element={dept.element} />}
+          {routes.map(r => <Route key={r.path} path={r.path} element={r.element} />)}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AppLayout>
@@ -98,6 +113,11 @@ function ProtectedRoutes() {
         <Route path="/contacts" element={<Contacts />} />
         <Route path="/deals" element={<Deals />} />
         <Route path="/projects" element={<Projects />} />
+        <Route path="/sites" element={<Sites />} />
+        <Route path="/scheduling" element={<Scheduling />} />
+        <Route path="/equipment" element={<EquipmentCheckouts />} />
+        <Route path="/maintenance" element={<Maintenance />} />
+        <Route path="/consumption" element={<Consumption />} />
         <Route path="/activities" element={<Activities />} />
         <Route path="/procurement" element={<Procurement />} />
         <Route path="/invoices" element={<Invoices />} />
