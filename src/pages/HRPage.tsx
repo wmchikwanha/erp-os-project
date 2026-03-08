@@ -39,6 +39,7 @@ export default function HRPage() {
   const removeReview = useDeleteReview();
   const uploadDoc = useUploadDocument();
   const removeDoc = useDeleteDocument();
+  const bulkInvite = useBulkImportInvitations();
 
   const [activeTab, setActiveTab] = useState<typeof tabs[number]>('Directory');
   const [formOpen, setFormOpen] = useState(false);
