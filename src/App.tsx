@@ -81,12 +81,12 @@ function ProtectedRoutes() {
 
   // Department managers: employee portal + their department route
   if (isDepartmentManager(role)) {
-    const dept = DEPT_ROUTE_MAP[role];
+    const routes = DEPT_ROUTE_MAP[role] || [];
     return (
       <AppLayout role={role}>
         <Routes>
           <Route path="/" element={<EmployeePortal />} />
-          {dept && <Route path={dept.path} element={dept.element} />}
+          {routes.map(r => <Route key={r.path} path={r.path} element={r.element} />)}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AppLayout>
