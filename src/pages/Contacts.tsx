@@ -19,11 +19,13 @@ export default function Contacts() {
   const { data: contacts = [], isLoading } = useContacts();
   const upsert = useUpsertContact();
   const remove = useDeleteContact();
+  const bulkImport = useBulkImportContacts();
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [formOpen, setFormOpen] = useState(false);
   const [editItem, setEditItem] = useState<any>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [csvOpen, setCsvOpen] = useState(false);
 
   const filtered = useMemo(() => {
     return contacts.filter((c) => {
