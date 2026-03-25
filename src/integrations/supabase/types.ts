@@ -157,6 +157,65 @@ export type Database = {
           },
         ]
       }
+      candidates: {
+        Row: {
+          applied_date: string
+          created_at: string
+          cv_file_path: string | null
+          cv_file_size: number | null
+          department: string | null
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          phone: string | null
+          position_id: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          applied_date?: string
+          created_at?: string
+          cv_file_path?: string | null
+          cv_file_size?: number | null
+          department?: string | null
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          phone?: string | null
+          position_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          applied_date?: string
+          created_at?: string
+          cv_file_path?: string | null
+          cv_file_size?: number | null
+          department?: string | null
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          position_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidates_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "job_positions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contacts: {
         Row: {
           assigned_to: string | null
@@ -703,6 +762,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      job_positions: {
+        Row: {
+          created_at: string
+          department: string
+          description: string | null
+          id: string
+          requirements: string | null
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          department?: string
+          description?: string | null
+          id?: string
+          requirements?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          department?: string
+          description?: string | null
+          id?: string
+          requirements?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       leave_requests: {
         Row: {

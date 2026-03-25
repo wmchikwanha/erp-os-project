@@ -1090,3 +1090,125 @@ export function useUpsertExpense() {
     onError: (e: Error) => toast.error(e.message),
   });
 }
+
+// ─── Job Positions ───
+
+export function useJobPositions() {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ['job_positions', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('job_positions').select('*').order('created_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+}
+
+export function useUpsertPosition() {
+  const qc = useQueryClient();
+  const { user } = useAuth();
+  return useMutation({
+    mutationFn: async (pos: { id?: string; title: string; department: string; description?: string; requirements?: string; status?: string }) => {
+      const payload = { ...pos, user_id: user!.id };
+      if (pos.id) {
+        const { error } = await supabase.from('job_positions').update(payload).eq('id', pos.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from('job_positions').insert(payload);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['job_positions'] }); toast.success('Position saved'); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export function useDeletePosition() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('job_positions').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['job_positions'] }); toast.success('Position deleted'); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+// ─── Candidates ───
+
+export function useCandidates() {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ['candidates', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('candidates').select('*, job_positions(title)').order('created_at', { ascending: false });
+      if (error) throw error;
+      return data.map((c: any) => ({ ...c, position_title: c.job_positions?.title ?? 'Unassigned' }));
+    },
+    enabled: !!user,
+  });
+}
+
+export function useUpsertCandidate() {
+  const qc = useQueryClient();
+  const { user } = useAuth();
+  return useMutation({
+    mutationFn: async (cand: { id?: string; name: string; email?: string; phone?: string; department?: string; position_id?: string | null; status?: string; notes?: string; applied_date?: string; cv_file_path?: string; cv_file_size?: number }) => {
+      const payload = { ...cand, user_id: user!.id };
+      if (cand.id) {
+        const { error } = await supabase.from('candidates').update(payload).eq('id', cand.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from('candidates').insert(payload);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['candidates'] }); toast.success('Candidate saved'); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export function useDeleteCandidate() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: { id: string; cvPath?: string }) => {
+      if (data.cvPath) {
+        await supabase.storage.from('candidate-cvs').remove([data.cvPath]);
+      }
+      const { error } = await supabase.from('candidates').delete().eq('id', data.id);
+      if (error) throw error;
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['candidates'] }); toast.success('Candidate deleted'); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export function useUploadCV() {
+  const qc = useQueryClient();
+  const { user } = useAuth();
+  return useMutation({
+    mutationFn: async (data: { file: File; candidateName: string; positionId?: string | null; email?: string; phone?: string; department?: string; notes?: string }) => {
+      const filePath = `${user!.id}/${Date.now()}_${data.file.name}`;
+      const { error: uploadError } = await supabase.storage.from('candidate-cvs').upload(filePath, data.file);
+      if (uploadError) throw uploadError;
+      const payload = {
+        user_id: user!.id,
+        name: data.candidateName,
+        email: data.email || null,
+        phone: data.phone || null,
+        department: data.department || null,
+        position_id: data.positionId || null,
+        cv_file_path: filePath,
+        cv_file_size: data.file.size,
+        notes: data.notes || null,
+      };
+      const { error } = await supabase.from('candidates').insert(payload);
+      if (error) throw error;
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['candidates'] }); toast.success('CV uploaded & candidate created'); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
