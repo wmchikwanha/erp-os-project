@@ -12,7 +12,7 @@ const DEPARTMENTS = ['Engineering', 'Marketing', 'Sales', 'Finance', 'HR', 'Oper
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  positions: { id: string; title: string; department: string }[];
+  positions: { id: string; title: string; department: string; status?: string }[];
   loading?: boolean;
   onSubmit: (data: { file: File; candidateName: string; email?: string; phone?: string; department?: string; positionId?: string | null; notes?: string }) => void;
 }
