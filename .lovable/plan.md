@@ -1,64 +1,64 @@
 
 
-## Fix: Employee Visibility and Manager Dropdown
+# Recruitment & CV Management Module
 
-### Problem
-The `Managers can view direct reports` RLS policy on the `employees` table contains a subquery that reads from `employees` itself:
-```sql
-manager_id IN (SELECT m.id FROM employees m WHERE m.email = get_auth_email())
-```
-This causes **recursive RLS evaluation** -- when PostgreSQL evaluates this policy, the inner query triggers RLS on the same table again, which can cause silent failures (empty results). This breaks employee visibility for all roles.
+## Problem
+Currently, employee documents are tied 1:1 to existing employees. HR needs a separate recruitment pipeline to manage incoming CVs from external candidates, organized by department and open positions, with search/filter capabilities for shortlisting.
 
-The same recursive pattern exists on `leave_requests` and `performance_reviews` manager policies.
+## Design Approach
 
-Additionally, there is no explicit admin policy on the `employees` table -- the admin only sees records because `user_id` happens to match.
+Three new database tables, a new "Recruitment" tab in the HR page, and a storage bucket for CV files.
 
-### Solution
+### Database Schema
 
-#### 1. Create a SECURITY DEFINER helper function
-A new function `get_my_employee_id()` that returns the current user's employee ID without triggering RLS:
+**1. `job_positions` table** — Open roles HR is hiring for
+- id, user_id, title, department, description (job description text), requirements, status (open/closed/on-hold), created_at, updated_at
 
-```sql
-CREATE OR REPLACE FUNCTION public.get_my_employee_id()
-RETURNS uuid
-LANGUAGE sql
-STABLE SECURITY DEFINER
-SET search_path = public
-AS $$
-  SELECT id FROM public.employees WHERE email = (
-    SELECT email FROM auth.users WHERE id = auth.uid()
-  )
-  LIMIT 1
-$$;
-```
+**2. `candidates` table** — People who submitted CVs
+- id, user_id, name, email, phone, department, position_id (FK → job_positions), cv_file_path, cv_file_size, status (new/shortlisted/interviewed/rejected/hired), notes, applied_date, created_at, updated_at
 
-#### 2. Update employees table policies
-- Add **"Admins can manage all employees"** (FOR ALL) policy
-- Drop and recreate **"Managers can view direct reports"** using `get_my_employee_id()` to avoid recursion:
+**3. Storage bucket** — `candidate-cvs` (private) for uploaded CV files
 
-```sql
-USING (manager_id = public.get_my_employee_id())
-```
+### RLS Policies
+- Admin: full CRUD on both tables
+- HR Manager: full CRUD on both tables
+- All others: no access
 
-#### 3. Update leave_requests and performance_reviews manager policies
-Drop and recreate the manager policies to use the new non-recursive function:
+### New UI Components
 
-```sql
--- Instead of the recursive subquery:
-employee_id IN (
-  SELECT e.id FROM employees e
-  WHERE e.manager_id = public.get_my_employee_id()
-)
-```
+**HR Page changes:**
+- Add two new tabs: `Positions` and `Recruitment`
+- **Positions tab**: List/create/edit open positions with department, title, description, requirements, status. Simple card layout.
+- **Recruitment tab**: 
+  - Filter bar: by department, by position, by status (new/shortlisted/rejected)
+  - Candidate cards showing name, position applied for, date, status badge
+  - Click to view CV (download), update status, add notes
+  - Upload CV dialog: select position (or unassigned), enter candidate name/email/phone, attach file
+  - Bulk status update for shortlisting
 
-#### 4. No frontend code changes needed
-The `useEmployees()` hook and `EmployeeFormDialog` already handle `manager_id` correctly. The Select Manager dropdown will work once the admin can see employees again.
+**New form dialogs:**
+- `PositionFormDialog.tsx` — title, department, description, requirements, status
+- `CandidateFormDialog.tsx` — name, email, phone, position select, CV file upload, notes
 
-### Technical Details (Database Migration)
+**New hooks in `useCrmData.ts`:**
+- `useJobPositions()`, `useUpsertPosition()`, `useDeletePosition()`
+- `useCandidates(filters?)`, `useUpsertCandidate()`, `useDeleteCandidate()`, `useUploadCV()`
 
-Single migration that:
-1. Creates `get_my_employee_id()` SECURITY DEFINER function
-2. Drops recursive policies: `Managers can view direct reports` (employees), `Managers can view direct reports leave_requests` (leave_requests), `Managers can update direct reports leave_requests` (leave_requests), `Managers can view direct reports reviews` (performance_reviews)
-3. Creates admin policy on employees: `Admins can manage all employees` (FOR ALL)
-4. Recreates all manager policies using `get_my_employee_id()` instead of recursive subqueries
+### User Flow
+1. HR creates a Position (e.g. "Senior Developer — Engineering") with job description
+2. HR uploads CVs against that position (or unassigned for general pool)
+3. HR filters candidates by department/position, reviews CVs, marks as shortlisted/rejected
+4. Later, HR searches the candidate pool by department/skills when new positions open
+
+### Files to Create
+- `src/components/forms/PositionFormDialog.tsx`
+- `src/components/forms/CandidateFormDialog.tsx`
+
+### Files to Modify
+- `src/pages/HRPage.tsx` — add Positions and Recruitment tabs
+- `src/hooks/useCrmData.ts` — add position and candidate hooks
+
+### Migration
+- Create `job_positions` and `candidates` tables with RLS
+- Create `candidate-cvs` storage bucket with RLS policies
 
