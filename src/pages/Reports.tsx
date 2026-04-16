@@ -1,5 +1,5 @@
 import { useDeals, useProducts, useEmployees, useProjects, usePurchaseOrders, useAssets, useInvoices, usePayments, useExpenses, useTimesheets } from '@/hooks/useCrmData';
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, FunnelChart, Funnel, LabelList } from 'recharts';
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 
 const COLORS = ['hsl(210, 70%, 50%)', 'hsl(38, 92%, 50%)', 'hsl(152, 60%, 38%)', 'hsl(0, 72%, 51%)', 'hsl(270, 60%, 55%)', 'hsl(190, 70%, 45%)'];
 
