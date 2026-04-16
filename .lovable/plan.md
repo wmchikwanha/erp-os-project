@@ -1,64 +1,73 @@
 
 
-# Recruitment & CV Management Module
+# ERP Enhancement Plan — Premium Utilities + Expanded Dashboard
 
-## Problem
-Currently, employee documents are tied 1:1 to existing employees. HR needs a separate recruitment pipeline to manage incoming CVs from external candidates, organized by department and open positions, with search/filter capabilities for shortlisting.
+## Analysis of Gaps vs SAP/Salesforce
 
-## Design Approach
+The system already covers CRM, Finance, HR, Procurement, Projects, and Operations well. Here are the high-value additions that would close the remaining gap:
 
-Three new database tables, a new "Recruitment" tab in the HR page, and a storage bucket for CV files.
+## New Features
 
-### Database Schema
+### 1. Accounts Receivable Aging Report (Dashboard + Reports)
+Show invoice aging buckets (Current, 30-day, 60-day, 90+ day) as a stacked bar or table. Critical for cash flow management — SAP's bread and butter.
 
-**1. `job_positions` table** — Open roles HR is hiring for
-- id, user_id, title, department, description (job description text), requirements, status (open/closed/on-hold), created_at, updated_at
+### 2. Expense vs Revenue Profitability View (Dashboard)
+Add a net profit/loss KPI and a monthly expenses-vs-revenue comparison chart. Pull from paid invoices (revenue) and approved expenses + received POs (costs).
 
-**2. `candidates` table** — People who submitted CVs
-- id, user_id, name, email, phone, department, position_id (FK → job_positions), cv_file_path, cv_file_size, status (new/shortlisted/interviewed/rejected/hired), notes, applied_date, created_at, updated_at
+### 3. Recruitment Pipeline Summary (Dashboard)
+New KPI row: Open Positions, New Candidates, Shortlisted count. HR module data already exists.
 
-**3. Storage bucket** — `candidate-cvs` (private) for uploaded CV files
+### 4. Workforce Utilization Chart (Dashboard)
+Compare scheduled hours (from work_schedules) vs logged hours (from timesheets) per project/site. Shows productivity at a glance.
 
-### RLS Policies
-- Admin: full CRUD on both tables
-- HR Manager: full CRUD on both tables
-- All others: no access
+### 5. Deal Conversion Funnel (Reports)
+Visual funnel: Prospecting → Negotiation → Closed Won with drop-off rates between stages.
 
-### New UI Components
+### 6. Cash Flow Forecast (Dashboard)
+Project expected cash inflows from unpaid invoices (by due date) vs upcoming expenses. Simple 30/60/90-day forward view.
 
-**HR Page changes:**
-- Add two new tabs: `Positions` and `Recruitment`
-- **Positions tab**: List/create/edit open positions with department, title, description, requirements, status. Simple card layout.
-- **Recruitment tab**: 
-  - Filter bar: by department, by position, by status (new/shortlisted/rejected)
-  - Candidate cards showing name, position applied for, date, status badge
-  - Click to view CV (download), update status, add notes
-  - Upload CV dialog: select position (or unassigned), enter candidate name/email/phone, attach file
-  - Bulk status update for shortlisting
+### 7. Asset Depreciation Summary (Reports)
+Show purchase_price vs current_value across asset categories. Pie chart of asset allocation by category.
 
-**New form dialogs:**
-- `PositionFormDialog.tsx` — title, department, description, requirements, status
-- `CandidateFormDialog.tsx` — name, email, phone, position select, CV file upload, notes
+### 8. Timesheet & Expense Summaries (Reports)
+Total hours logged by project, total expenses by category — currently missing from Reports page.
 
-**New hooks in `useCrmData.ts`:**
-- `useJobPositions()`, `useUpsertPosition()`, `useDeletePosition()`
-- `useCandidates(filters?)`, `useUpsertCandidate()`, `useDeleteCandidate()`, `useUploadCV()`
+### 9. Quick Actions Panel (Dashboard)
+A row of shortcut buttons: "New Invoice", "Log Expense", "Record Payment", "Create Deal" — reduces clicks for daily tasks.
 
-### User Flow
-1. HR creates a Position (e.g. "Senior Developer — Engineering") with job description
-2. HR uploads CVs against that position (or unassigned for general pool)
-3. HR filters candidates by department/position, reviews CVs, marks as shortlisted/rejected
-4. Later, HR searches the candidate pool by department/skills when new positions open
+## Expanded Dashboard Metrics
 
-### Files to Create
-- `src/components/forms/PositionFormDialog.tsx`
-- `src/components/forms/CandidateFormDialog.tsx`
+Add to the existing Dashboard:
+- **Receivables Aging** — mini table showing $amounts in 0-30/31-60/61-90/90+ day buckets
+- **Net Margin KPI** — revenue minus expenses
+- **Cash Flow Mini-Chart** — upcoming inflows vs outflows by week
+- **Recruitment Snapshot** — open positions / candidates in pipeline
+- **Workforce Utilization** — bar chart of scheduled vs actual hours
+- **Quick Actions** strip at the top
+
+## Expanded Reports Page
+
+Add sections:
+- **Invoice Aging Analysis** — table + chart
+- **Deal Conversion Funnel** — visual funnel
+- **Asset Depreciation** — category breakdown with purchase vs current value
+- **Timesheet Summary** — hours by project/employee
+- **Expense Breakdown** — by category with pie chart
+- **Monthly P&L** — revenue vs costs trend
+
+## Technical Details
 
 ### Files to Modify
-- `src/pages/HRPage.tsx` — add Positions and Recruitment tabs
-- `src/hooks/useCrmData.ts` — add position and candidate hooks
+- `src/pages/Dashboard.tsx` — add 6 new sections (aging, net margin, cash flow, recruitment, workforce, quick actions)
+- `src/pages/Reports.tsx` — add 6 new report sections (aging, funnel, depreciation, timesheets, expenses, P&L)
 
-### Migration
-- Create `job_positions` and `candidates` tables with RLS
-- Create `candidate-cvs` storage bucket with RLS policies
+### Data Sources
+All data already exists in current hooks. New hooks needed:
+- None — everything computes from `useInvoices`, `usePayments`, `useExpenses`, `useTimesheets`, `useWorkSchedules`, `useDeals`, `useAssets`, `useJobPositions`, `useCandidates`, `useProducts`
+
+### No Database Changes Required
+All new features are computed views over existing data.
+
+### New Dependencies
+None — uses existing `recharts` components (BarChart, PieChart, Tooltip, etc.)
 
