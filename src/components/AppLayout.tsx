@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import AskAIPanel from '@/components/AskAIPanel';
 import NotificationsPanel from '@/components/NotificationsPanel';
+import HelpDialog from '@/components/HelpDialog';
 import type { AppRole } from '@/hooks/useRole';
 
 const ALL_NAV_ITEMS = [
@@ -117,6 +118,7 @@ export default function AppLayout({ children, role = 'admin' }: { children: Reac
             {roleLabel && <span className="status-badge bg-info/10 text-info text-[10px]">{roleLabel}</span>}
           </div>
           <div className="flex items-center gap-2">
+            <HelpDialog />
             <NotificationsPanel />
             <NavLink to="/settings" className="p-1.5 rounded-md hover:bg-muted text-muted-foreground"><Settings className="w-4 h-4" /></NavLink>
             <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
@@ -131,6 +133,11 @@ export default function AppLayout({ children, role = 'admin' }: { children: Reac
         </header>
 
         <main className="flex-1 overflow-y-auto p-4 lg:p-6">{children}</main>
+        <footer className="shrink-0 border-t border-border bg-card px-4 py-2 text-center">
+          <p className="text-[10px] text-muted-foreground/60">
+            © 2026 StratedgeAI · <span className="text-muted-foreground/70">Developed by Walter C.</span>
+          </p>
+        </footer>
       </div>
 
       {role === 'admin' && <AskAIPanel />}
