@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { Eye, EyeOff, User, Lock } from 'lucide-react';
+import { useIndustryDNA, DNA_LABELS, type IndustryDNA } from '@/hooks/useIndustryDNA';
 
 export default function Settings() {
   const { user } = useAuth();
@@ -109,6 +110,31 @@ export default function Settings() {
             {changingPassword ? 'Changing...' : 'Change Password'}
           </Button>
         </form>
+      </div>
+      <IndustryDNASection />
+    </div>
+  );
+}
+
+function IndustryDNASection() {
+  const { dna, setDNA, saving } = useIndustryDNA();
+  return (
+    <div className="bg-card border border-border rounded-lg p-4 space-y-3">
+      <div>
+        <h2 className="text-sm font-semibold">Industry DNA</h2>
+        <p className="text-xs text-muted-foreground">Reshapes the SAE's priorities and the dashboard widget order to match how your business actually runs.</p>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        {(Object.keys(DNA_LABELS) as IndustryDNA[]).map((k) => (
+          <button
+            key={k}
+            onClick={() => setDNA(k)}
+            disabled={saving}
+            className={`text-left px-3 py-2 rounded-md border text-xs transition-colors ${dna === k ? 'border-primary bg-primary/10 text-foreground' : 'border-border hover:bg-muted/50 text-muted-foreground'}`}
+          >
+            {DNA_LABELS[k]}
+          </button>
+        ))}
       </div>
     </div>
   );
