@@ -258,6 +258,39 @@ export type Database = {
         }
         Relationships: []
       }
+      currency_rates: {
+        Row: {
+          created_at: string
+          currency: string
+          effective_date: string
+          id: string
+          official_rate: number
+          parallel_rate: number
+          source: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          currency: string
+          effective_date?: string
+          id?: string
+          official_rate?: number
+          parallel_rate?: number
+          source?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          effective_date?: string
+          id?: string
+          official_rate?: number
+          parallel_rate?: number
+          source?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       deals: {
         Row: {
           actual_close: string | null
@@ -846,6 +879,33 @@ export type Database = {
           },
         ]
       }
+      load_shedding_schedule: {
+        Row: {
+          created_at: string
+          end_time: string
+          id: string
+          source: string | null
+          start_time: string
+          zone: string
+        }
+        Insert: {
+          created_at?: string
+          end_time: string
+          id?: string
+          source?: string | null
+          start_time: string
+          zone: string
+        }
+        Update: {
+          created_at?: string
+          end_time?: string
+          id?: string
+          source?: string | null
+          start_time?: string
+          zone?: string
+        }
+        Relationships: []
+      }
       maintenance_logs: {
         Row: {
           asset_id: string
@@ -901,6 +961,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      material_baskets: {
+        Row: {
+          created_at: string
+          id: string
+          items: Json
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          items?: Json
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          items?: Json
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       payments: {
         Row: {
@@ -1055,6 +1142,7 @@ export type Database = {
           created_at: string
           full_name: string | null
           id: string
+          industry_dna: string
           updated_at: string
           user_id: string
         }
@@ -1063,6 +1151,7 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          industry_dna?: string
           updated_at?: string
           user_id: string
         }
@@ -1071,6 +1160,7 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          industry_dna?: string
           updated_at?: string
           user_id?: string
         }
@@ -1240,6 +1330,69 @@ export type Database = {
           },
         ]
       }
+      regulatory_notices: {
+        Row: {
+          affected_modules: string[] | null
+          created_at: string
+          effective_date: string | null
+          id: string
+          si_number: string | null
+          source_url: string | null
+          summary: string | null
+          title: string
+        }
+        Insert: {
+          affected_modules?: string[] | null
+          created_at?: string
+          effective_date?: string | null
+          id?: string
+          si_number?: string | null
+          source_url?: string | null
+          summary?: string | null
+          title: string
+        }
+        Update: {
+          affected_modules?: string[] | null
+          created_at?: string
+          effective_date?: string | null
+          id?: string
+          si_number?: string | null
+          source_url?: string | null
+          summary?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
+      sae_overrides: {
+        Row: {
+          created_at: string
+          id: string
+          original_action: string
+          override_action: string | null
+          reason: string | null
+          recommendation_key: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          original_action: string
+          override_action?: string | null
+          reason?: string | null
+          recommendation_key: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          original_action?: string
+          override_action?: string | null
+          reason?: string | null
+          recommendation_key?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       sites: {
         Row: {
           address: string | null
@@ -1298,6 +1451,87 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      supplier_quotes: {
+        Row: {
+          created_at: string
+          currency: string
+          id: string
+          item: string
+          notes: string | null
+          quoted_at: string
+          supplier_id: string | null
+          unit_price: number
+          user_id: string
+          valid_until: string | null
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          id?: string
+          item: string
+          notes?: string | null
+          quoted_at?: string
+          supplier_id?: string | null
+          unit_price?: number
+          user_id: string
+          valid_until?: string | null
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          id?: string
+          item?: string
+          notes?: string | null
+          quoted_at?: string
+          supplier_id?: string | null
+          unit_price?: number
+          user_id?: string
+          valid_until?: string | null
+        }
+        Relationships: []
+      }
+      tax_obligations: {
+        Row: {
+          amount: number
+          authority: string
+          created_at: string
+          currency: string
+          due_date: string
+          id: string
+          name: string
+          notes: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          authority?: string
+          created_at?: string
+          currency?: string
+          due_date: string
+          id?: string
+          name: string
+          notes?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          authority?: string
+          created_at?: string
+          currency?: string
+          due_date?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       timesheets: {
         Row: {
