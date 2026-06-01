@@ -3,6 +3,7 @@ import {
   LayoutDashboard, Users, Handshake, CalendarCheck, Package,
   FileText, UserCog, BarChart3, Settings, ChevronLeft, Menu, LogOut, Home, FolderKanban,
   Building2, CalendarDays, PackageCheck, Wrench, TrendingDown, CreditCard, Timer, Receipt,
+  Activity, Sparkles,
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -10,6 +11,7 @@ import { useAuth } from '@/hooks/useAuth';
 import AskAIPanel from '@/components/AskAIPanel';
 import NotificationsPanel from '@/components/NotificationsPanel';
 import HelpDialog from '@/components/HelpDialog';
+import OfflineIndicator from '@/components/OfflineIndicator';
 import type { AppRole } from '@/hooks/useRole';
 
 const ALL_NAV_ITEMS = [
@@ -31,6 +33,8 @@ const ALL_NAV_ITEMS = [
   { to: '/expenses', icon: Receipt, label: 'Expenses', roles: ['admin', 'finance_manager'] },
   { to: '/hr', icon: UserCog, label: 'HR', roles: ['admin', 'hr_manager'] },
   { to: '/reports', icon: BarChart3, label: 'Reports', roles: ['admin'] },
+  { to: '/sae/liquidity', icon: Activity, label: 'Liquidity Guardian', roles: ['admin', 'finance_manager'] },
+  { to: '/sae/control', icon: Sparkles, label: 'SAE Control', roles: ['admin', 'finance_manager'] },
 ];
 
 function getNavItems(role: string) {
@@ -118,6 +122,7 @@ export default function AppLayout({ children, role = 'admin' }: { children: Reac
             {roleLabel && <span className="status-badge bg-info/10 text-info text-[10px]">{roleLabel}</span>}
           </div>
           <div className="flex items-center gap-2">
+            <OfflineIndicator />
             <HelpDialog />
             <NotificationsPanel />
             <NavLink to="/settings" className="p-1.5 rounded-md hover:bg-muted text-muted-foreground"><Settings className="w-4 h-4" /></NavLink>

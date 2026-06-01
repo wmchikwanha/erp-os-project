@@ -28,6 +28,8 @@ import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import LiquidityGuardian from "./pages/sae/LiquidityGuardian";
+import SAEControlPanel from "./pages/sae/SAEControlPanel";
 
 const queryClient = new QueryClient();
 
@@ -133,6 +135,8 @@ function ProtectedRoutes() {
         <Route path="/expenses" element={<Expenses />} />
         <Route path="/hr" element={<HRPage />} />
         <Route path="/reports" element={<Reports />} />
+        <Route path="/sae/liquidity" element={<LiquidityGuardian />} />
+        <Route path="/sae/control" element={<SAEControlPanel />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
