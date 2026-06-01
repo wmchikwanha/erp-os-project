@@ -8,11 +8,11 @@ type Msg = { role: 'user' | 'assistant'; content: string };
 const ASK_AI_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ask-ai`;
 
 const QUICK_PROMPTS = [
-  'Show outstanding invoices',
-  'Summarise the sales pipeline',
-  'Who is best suited for a leadership role?',
-  'Low stock product alerts',
-  'Leave balance overview by department',
+  'What is my forward cash position this week?',
+  'Which invoice should I chase first?',
+  'Can I afford to pay supplier X in USD this week?',
+  'What ZIMRA deadlines am I exposed to in the next 14 days?',
+  'How does the load-shedding schedule affect my production this week?',
 ];
 
 export default function AskAIPanel() {
