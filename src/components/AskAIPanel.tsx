@@ -116,7 +116,7 @@ export default function AskAIPanel() {
         className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-5 py-3 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all hover:scale-105 group"
       >
         <Sparkles className="w-5 h-5 group-hover:animate-pulse" />
-        <span className="font-semibold text-sm">Ask AI</span>
+        <span className="font-semibold text-sm">SAE</span>
       </button>
     );
   }
