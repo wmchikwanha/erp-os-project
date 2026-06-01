@@ -137,8 +137,8 @@ export default function AskAIPanel() {
             <Sparkles className="w-4 h-4 text-primary-foreground" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-foreground">StratedgeOS AI</h3>
-            <p className="text-[10px] text-muted-foreground">Executive Intelligence</p>
+            <h3 className="text-sm font-bold text-foreground">Situational Awareness Engine</h3>
+            <p className="text-[10px] text-muted-foreground">Survival intelligence for Zimbabwean SMEs</p>
           </div>
         </div>
         <div className="flex items-center gap-1">
