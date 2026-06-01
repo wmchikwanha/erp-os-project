@@ -51,7 +51,7 @@ export async function drainQueue(): Promise<{ ok: number; failed: number }> {
   let ok = 0, failed = 0;
   for (const op of all) {
     try {
-      let q: any = supabase.from(op.table);
+      let q: any = (supabase as any).from(op.table);
       if (op.op === 'insert') q = q.insert(op.payload);
       if (op.op === 'update') {
         q = q.update(op.payload);
