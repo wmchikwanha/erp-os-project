@@ -8,11 +8,11 @@ type Msg = { role: 'user' | 'assistant'; content: string };
 const ASK_AI_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ask-ai`;
 
 const QUICK_PROMPTS = [
-  'Show outstanding invoices',
-  'Summarise the sales pipeline',
-  'Who is best suited for a leadership role?',
-  'Low stock product alerts',
-  'Leave balance overview by department',
+  'What is my forward cash position this week?',
+  'Which invoice should I chase first?',
+  'Can I afford to pay supplier X in USD this week?',
+  'What ZIMRA deadlines am I exposed to in the next 14 days?',
+  'How does the load-shedding schedule affect my production this week?',
 ];
 
 export default function AskAIPanel() {
@@ -116,7 +116,7 @@ export default function AskAIPanel() {
         className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-5 py-3 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all hover:scale-105 group"
       >
         <Sparkles className="w-5 h-5 group-hover:animate-pulse" />
-        <span className="font-semibold text-sm">Ask AI</span>
+        <span className="font-semibold text-sm">SAE</span>
       </button>
     );
   }
@@ -137,8 +137,8 @@ export default function AskAIPanel() {
             <Sparkles className="w-4 h-4 text-primary-foreground" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-foreground">StratedgeOS AI</h3>
-            <p className="text-[10px] text-muted-foreground">Executive Intelligence</p>
+            <h3 className="text-sm font-bold text-foreground">Situational Awareness Engine</h3>
+            <p className="text-[10px] text-muted-foreground">Survival intelligence for Zimbabwean SMEs</p>
           </div>
         </div>
         <div className="flex items-center gap-1">
