@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Users, Handshake, CalendarCheck, Package,
   FileText, UserCog, BarChart3, Settings, ChevronLeft, Menu, LogOut, Home, FolderKanban,
   Building2, CalendarDays, PackageCheck, Wrench, TrendingDown, CreditCard, Timer, Receipt,
-  Activity, Sparkles,
+  Activity, Sparkles, ShoppingCart, Shield,
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -34,6 +34,8 @@ const ALL_NAV_ITEMS = [
   { to: '/hr', icon: UserCog, label: 'HR', roles: ['admin', 'hr_manager'] },
   { to: '/reports', icon: BarChart3, label: 'Reports', roles: ['admin'] },
   { to: '/sae/liquidity', icon: Activity, label: 'Liquidity Guardian', roles: ['admin', 'finance_manager'] },
+  { to: '/sae/procurement', icon: ShoppingCart, label: 'Procurement Scout', roles: ['admin', 'procurement_manager'] },
+  { to: '/sae/compliance', icon: Shield, label: 'Compliance Monitor', roles: ['admin', 'finance_manager', 'hr_manager'] },
   { to: '/sae/control', icon: Sparkles, label: 'SAE Control', roles: ['admin', 'finance_manager'] },
 ];
 
