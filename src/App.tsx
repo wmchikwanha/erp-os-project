@@ -58,8 +58,12 @@ const DEPT_ROUTE_MAP: Record<string, { path: string; element: React.ReactNode }[
     { path: '/equipment', element: <EquipmentCheckouts /> },
     { path: '/maintenance', element: <Maintenance /> },
     { path: '/consumption', element: <Consumption /> },
+    { path: '/sae/procurement', element: <ProcurementScout /> },
   ],
-  hr_manager: [{ path: '/hr', element: <HRPage /> }],
+  hr_manager: [
+    { path: '/hr', element: <HRPage /> },
+    { path: '/sae/compliance', element: <ComplianceMonitor /> },
+  ],
   project_manager: [
     { path: '/projects', element: <Projects /> },
     { path: '/sites', element: <Sites /> },
@@ -70,6 +74,9 @@ const DEPT_ROUTE_MAP: Record<string, { path: string; element: React.ReactNode }[
     { path: '/invoices', element: <Invoices /> },
     { path: '/payments', element: <Payments /> },
     { path: '/expenses', element: <Expenses /> },
+    { path: '/sae/liquidity', element: <LiquidityGuardian /> },
+    { path: '/sae/compliance', element: <ComplianceMonitor /> },
+    { path: '/sae/control', element: <SAEControlPanel /> },
   ],
 };
 

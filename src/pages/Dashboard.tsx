@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import SAESnapshot from '@/components/sae/SAESnapshot';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -147,6 +148,9 @@ export default function Dashboard() {
           </Button>
         ))}
       </div>
+
+      {/* SAE — Situational Awareness snapshot */}
+      <SAESnapshot />
 
       {/* Primary KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
