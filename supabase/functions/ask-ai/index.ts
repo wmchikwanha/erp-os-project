@@ -47,6 +47,8 @@ serve(async (req) => {
       { data: taxObligations },
       { data: loadShedding },
       { data: regulatoryNotices },
+      { data: supplierQuotes },
+      { data: materialBaskets },
     ] = await Promise.all([
       supabase.from("invoices").select("invoice_number, total_amount, status, due_date, issue_date").eq("user_id", userId).limit(200),
       supabase.from("payments").select("amount, payment_date, method, invoice_id").eq("user_id", userId).limit(200),
@@ -56,9 +58,11 @@ serve(async (req) => {
       supabase.from("deals").select("title, value, stage, probability, expected_close, currency").eq("user_id", userId).limit(100),
       supabase.from("projects").select("name, status, budget, actual_cost, progress, end_date").eq("user_id", userId).limit(100),
       supabase.from("currency_rates").select("currency, official_rate, parallel_rate, effective_date").order("effective_date", { ascending: false }).limit(20),
-      supabase.from("tax_obligations").select("name, authority, amount, currency, due_date, status").eq("user_id", userId).order("due_date").limit(30),
+      supabase.from("tax_obligations").select("name, authority, amount, currency, due_date, status, recurrence").eq("user_id", userId).order("due_date").limit(30),
       supabase.from("load_shedding_schedule").select("zone, start_time, end_time").gte("end_time", new Date().toISOString()).limit(30),
       supabase.from("regulatory_notices").select("title, si_number, effective_date, summary, affected_modules").order("effective_date", { ascending: false }).limit(20),
+      supabase.from("supplier_quotes").select("item, supplier_name, unit_price, currency, quoted_at, valid_until, lead_time_days").eq("user_id", userId).order("quoted_at", { ascending: false }).limit(100),
+      supabase.from("material_baskets").select("name, items").eq("user_id", userId).limit(20),
     ]);
 
     const ctx: string[] = [];
@@ -78,6 +82,9 @@ serve(async (req) => {
     if (taxObligations?.length) ctx.push(`## Tax & Statutory Obligations (${upcomingTax.length} pending)\n${JSON.stringify(taxObligations, null, 1)}`);
     if (loadShedding?.length) ctx.push(`## Upcoming Load-Shedding Windows\n${JSON.stringify(loadShedding, null, 1)}`);
     if (regulatoryNotices?.length) ctx.push(`## Regulatory Notices (SIs, ZIMRA, labor)\n${JSON.stringify(regulatoryNotices, null, 1)}`);
+    if (materialBaskets?.length) ctx.push(`## Material Baskets (items the user tracks for procurement)\n${JSON.stringify(materialBaskets, null, 1)}`);
+    if (supplierQuotes?.length) ctx.push(`## Supplier Quotes (last 100, most recent first; convert non-USD using the parallel rate)\n${JSON.stringify(supplierQuotes.slice(0, 60), null, 1)}`);
+
 
     const systemPrompt = `You are the **Situational Awareness Engine (SAE)** for StratedgeOS — a contextual business companion for Zimbabwean SMEs. Today is ${today}.
 

@@ -30,6 +30,8 @@ import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import LiquidityGuardian from "./pages/sae/LiquidityGuardian";
 import SAEControlPanel from "./pages/sae/SAEControlPanel";
+import ProcurementScout from "./pages/sae/ProcurementScout";
+import ComplianceMonitor from "./pages/sae/ComplianceMonitor";
 
 const queryClient = new QueryClient();
 
@@ -56,8 +58,12 @@ const DEPT_ROUTE_MAP: Record<string, { path: string; element: React.ReactNode }[
     { path: '/equipment', element: <EquipmentCheckouts /> },
     { path: '/maintenance', element: <Maintenance /> },
     { path: '/consumption', element: <Consumption /> },
+    { path: '/sae/procurement', element: <ProcurementScout /> },
   ],
-  hr_manager: [{ path: '/hr', element: <HRPage /> }],
+  hr_manager: [
+    { path: '/hr', element: <HRPage /> },
+    { path: '/sae/compliance', element: <ComplianceMonitor /> },
+  ],
   project_manager: [
     { path: '/projects', element: <Projects /> },
     { path: '/sites', element: <Sites /> },
@@ -68,6 +74,9 @@ const DEPT_ROUTE_MAP: Record<string, { path: string; element: React.ReactNode }[
     { path: '/invoices', element: <Invoices /> },
     { path: '/payments', element: <Payments /> },
     { path: '/expenses', element: <Expenses /> },
+    { path: '/sae/liquidity', element: <LiquidityGuardian /> },
+    { path: '/sae/compliance', element: <ComplianceMonitor /> },
+    { path: '/sae/control', element: <SAEControlPanel /> },
   ],
 };
 
@@ -136,6 +145,8 @@ function ProtectedRoutes() {
         <Route path="/hr" element={<HRPage />} />
         <Route path="/reports" element={<Reports />} />
         <Route path="/sae/liquidity" element={<LiquidityGuardian />} />
+        <Route path="/sae/procurement" element={<ProcurementScout />} />
+        <Route path="/sae/compliance" element={<ComplianceMonitor />} />
         <Route path="/sae/control" element={<SAEControlPanel />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="*" element={<NotFound />} />

@@ -989,6 +989,27 @@ export type Database = {
         }
         Relationships: []
       }
+      notice_acknowledgements: {
+        Row: {
+          acknowledged_at: string
+          id: string
+          notice_id: string
+          user_id: string
+        }
+        Insert: {
+          acknowledged_at?: string
+          id?: string
+          notice_id: string
+          user_id: string
+        }
+        Update: {
+          acknowledged_at?: string
+          id?: string
+          notice_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       payments: {
         Row: {
           amount: number
@@ -1458,9 +1479,11 @@ export type Database = {
           currency: string
           id: string
           item: string
+          lead_time_days: number
           notes: string | null
           quoted_at: string
           supplier_id: string | null
+          supplier_name: string | null
           unit_price: number
           user_id: string
           valid_until: string | null
@@ -1470,9 +1493,11 @@ export type Database = {
           currency?: string
           id?: string
           item: string
+          lead_time_days?: number
           notes?: string | null
           quoted_at?: string
           supplier_id?: string | null
+          supplier_name?: string | null
           unit_price?: number
           user_id: string
           valid_until?: string | null
@@ -1482,9 +1507,11 @@ export type Database = {
           currency?: string
           id?: string
           item?: string
+          lead_time_days?: number
           notes?: string | null
           quoted_at?: string
           supplier_id?: string | null
+          supplier_name?: string | null
           unit_price?: number
           user_id?: string
           valid_until?: string | null
@@ -1501,6 +1528,8 @@ export type Database = {
           id: string
           name: string
           notes: string | null
+          recurrence: string
+          reminder_days_before: number
           status: string
           updated_at: string
           user_id: string
@@ -1514,6 +1543,8 @@ export type Database = {
           id?: string
           name: string
           notes?: string | null
+          recurrence?: string
+          reminder_days_before?: number
           status?: string
           updated_at?: string
           user_id: string
@@ -1527,6 +1558,8 @@ export type Database = {
           id?: string
           name?: string
           notes?: string | null
+          recurrence?: string
+          reminder_days_before?: number
           status?: string
           updated_at?: string
           user_id?: string
