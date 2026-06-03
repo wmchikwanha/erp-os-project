@@ -32,6 +32,7 @@ import LiquidityGuardian from "./pages/sae/LiquidityGuardian";
 import SAEControlPanel from "./pages/sae/SAEControlPanel";
 import ProcurementScout from "./pages/sae/ProcurementScout";
 import ComplianceMonitor from "./pages/sae/ComplianceMonitor";
+import LoadSheddingPlanner from "./pages/sae/LoadSheddingPlanner";
 
 const queryClient = new QueryClient();
 
@@ -59,6 +60,7 @@ const DEPT_ROUTE_MAP: Record<string, { path: string; element: React.ReactNode }[
     { path: '/maintenance', element: <Maintenance /> },
     { path: '/consumption', element: <Consumption /> },
     { path: '/sae/procurement', element: <ProcurementScout /> },
+    { path: '/sae/operations', element: <LoadSheddingPlanner /> },
   ],
   hr_manager: [
     { path: '/hr', element: <HRPage /> },
@@ -69,6 +71,7 @@ const DEPT_ROUTE_MAP: Record<string, { path: string; element: React.ReactNode }[
     { path: '/sites', element: <Sites /> },
     { path: '/scheduling', element: <Scheduling /> },
     { path: '/timesheets', element: <Timesheets /> },
+    { path: '/sae/operations', element: <LoadSheddingPlanner /> },
   ],
   finance_manager: [
     { path: '/invoices', element: <Invoices /> },
@@ -147,6 +150,7 @@ function ProtectedRoutes() {
         <Route path="/sae/liquidity" element={<LiquidityGuardian />} />
         <Route path="/sae/procurement" element={<ProcurementScout />} />
         <Route path="/sae/compliance" element={<ComplianceMonitor />} />
+        <Route path="/sae/operations" element={<LoadSheddingPlanner />} />
         <Route path="/sae/control" element={<SAEControlPanel />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="*" element={<NotFound />} />
