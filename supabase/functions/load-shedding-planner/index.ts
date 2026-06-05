@@ -45,6 +45,7 @@ serve(async (req) => {
       { data: schedules },
       { data: checkouts },
       { data: assets },
+      { data: rulesRow },
     ] = await Promise.all([
       supabase
         .from("load_shedding_schedule")
@@ -67,7 +68,22 @@ serve(async (req) => {
         .from("assets")
         .select("id, name, category")
         .eq("user_id", userId),
+      supabase
+        .from("shift_collision_rules")
+        .select("min_overlap_hours, severity_threshold_hours, urgent_collision_count, auto_shift_minutes, ignore_zones, enabled")
+        .eq("user_id", userId)
+        .maybeSingle(),
     ]);
+
+    const rules = {
+      min_overlap_hours: rulesRow?.min_overlap_hours ?? 1,
+      severity_threshold_hours: rulesRow?.severity_threshold_hours ?? 4,
+      urgent_collision_count: rulesRow?.urgent_collision_count ?? 3,
+      auto_shift_minutes: rulesRow?.auto_shift_minutes ?? 60,
+      ignore_zones: (rulesRow?.ignore_zones ?? []) as string[],
+      enabled: rulesRow?.enabled ?? true,
+    };
+
 
     const allWindows = (windows || []) as Window[];
 
