@@ -48,7 +48,16 @@ export interface LoadShedResponse {
   collisions: LoadShedCollision[];
   windows: LoadShedWindow[];
   recommendations: LoadShedRec[];
+  rules?: {
+    min_overlap_hours: number;
+    severity_threshold_hours: number;
+    urgent_collision_count: number;
+    auto_shift_minutes: number;
+    ignore_zones: string[];
+    enabled: boolean;
+  };
 }
+
 
 export function useLoadSheddingPlanner() {
   const { session } = useAuth();
