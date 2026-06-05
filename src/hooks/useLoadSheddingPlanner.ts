@@ -9,7 +9,9 @@ export interface LoadShedRec {
   inputs: string;
   logic: string;
   action: string;
+  source_collision_id?: string;
 }
+
 
 export interface LoadShedDaily {
   date: string;
