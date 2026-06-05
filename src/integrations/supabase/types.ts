@@ -1010,6 +1010,63 @@ export type Database = {
         }
         Relationships: []
       }
+      outage_action_plans: {
+        Row: {
+          assigned_to: string | null
+          completion_notes: string | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          rationale_action: string | null
+          rationale_inputs: string | null
+          rationale_logic: string | null
+          recommendation_key: string
+          severity: string
+          source_collision_id: string | null
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          completion_notes?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          rationale_action?: string | null
+          rationale_inputs?: string | null
+          rationale_logic?: string | null
+          recommendation_key: string
+          severity?: string
+          source_collision_id?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assigned_to?: string | null
+          completion_notes?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          rationale_action?: string | null
+          rationale_inputs?: string | null
+          rationale_logic?: string | null
+          recommendation_key?: string
+          severity?: string
+          source_collision_id?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       payments: {
         Row: {
           amount: number
@@ -1410,6 +1467,45 @@ export type Database = {
           override_action?: string | null
           reason?: string | null
           recommendation_key?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      shift_collision_rules: {
+        Row: {
+          auto_shift_minutes: number
+          created_at: string
+          enabled: boolean
+          id: string
+          ignore_zones: string[]
+          min_overlap_hours: number
+          severity_threshold_hours: number
+          updated_at: string
+          urgent_collision_count: number
+          user_id: string
+        }
+        Insert: {
+          auto_shift_minutes?: number
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          ignore_zones?: string[]
+          min_overlap_hours?: number
+          severity_threshold_hours?: number
+          updated_at?: string
+          urgent_collision_count?: number
+          user_id: string
+        }
+        Update: {
+          auto_shift_minutes?: number
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          ignore_zones?: string[]
+          min_overlap_hours?: number
+          severity_threshold_hours?: number
+          updated_at?: string
+          urgent_collision_count?: number
           user_id?: string
         }
         Relationships: []

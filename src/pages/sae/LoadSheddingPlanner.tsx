@@ -1,12 +1,19 @@
-import { useLoadSheddingPlanner } from '@/hooks/useLoadSheddingPlanner';
+import { useState } from 'react';
+import { useLoadSheddingPlanner, type LoadShedRec } from '@/hooks/useLoadSheddingPlanner';
 import RationaleCard from '@/components/sae/RationaleCard';
+import CreateActionPlanDialog from '@/components/sae/CreateActionPlanDialog';
+import CollisionRulesDialog from '@/components/sae/CollisionRulesDialog';
+import OutageActionPlansBoard from '@/components/sae/OutageActionPlansBoard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
-import { AlertTriangle, Zap, Clock, Battery } from 'lucide-react';
+import { AlertTriangle, Zap, Clock, Battery, Plus, Settings2, ClipboardList } from 'lucide-react';
 
 export default function LoadSheddingPlanner() {
   const { data, isLoading, error } = useLoadSheddingPlanner();
+  const [planFor, setPlanFor] = useState<LoadShedRec | null>(null);
+  const [rulesOpen, setRulesOpen] = useState(false);
 
   if (isLoading) return <div className="p-6 text-sm text-muted-foreground">Mapping outage exposure…</div>;
   if (error) return <div className="p-6 text-sm text-destructive">Could not load planner: {(error as Error).message}</div>;
@@ -15,14 +22,42 @@ export default function LoadSheddingPlanner() {
   const urgent = data.recommendations.filter((r) => r.severity === 'urgent');
   const upcoming = data.recommendations.filter((r) => r.severity !== 'urgent');
 
+  const renderRec = (r: LoadShedRec) => (
+    <div key={r.recommendation_key} className="space-y-2">
+      <div className="flex items-center gap-2 flex-wrap">
+        <Badge variant={r.severity === 'urgent' ? 'destructive' : 'secondary'}>{r.title}</Badge>
+        <Button size="sm" variant="outline" className="h-6 text-[11px] px-2" onClick={() => setPlanFor(r)}>
+          <Plus className="w-3 h-3 mr-1" /> Create plan
+        </Button>
+      </div>
+      <RationaleCard recommendationKey={r.recommendation_key} inputs={r.inputs} logic={r.logic} action={r.action} />
+    </div>
+  );
+
   return (
     <div className="space-y-6 max-w-5xl">
-      <header className="space-y-1">
-        <h1 className="text-2xl font-bold">Load-Shedding Planner</h1>
-        <p className="text-sm text-muted-foreground">
-          Next 7 days of outage exposure mapped against your shift & equipment plan. Updated {new Date(data.generated_at).toLocaleString()}.
-        </p>
+      <header className="space-y-1 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold">Load-Shedding Planner</h1>
+          <p className="text-sm text-muted-foreground">
+            Next 7 days of outage exposure mapped against your shift &amp; equipment plan. Updated {new Date(data.generated_at).toLocaleString()}.
+          </p>
+        </div>
+        <Button variant="outline" size="sm" onClick={() => setRulesOpen(true)}>
+          <Settings2 className="w-3.5 h-3.5 mr-1.5" /> Collision rules
+        </Button>
       </header>
+
+      {data.rules && (
+        <div className="text-[11px] text-muted-foreground flex flex-wrap gap-x-3 gap-y-1">
+          <span>Min overlap: <strong>{data.rules.min_overlap_hours}h</strong></span>
+          <span>Urgent ≥ <strong>{data.rules.severity_threshold_hours}h</strong></span>
+          <span>Urgent count: <strong>{data.rules.urgent_collision_count}</strong></span>
+          <span>Suggested shift: <strong>{data.rules.auto_shift_minutes}m</strong></span>
+          {data.rules.ignore_zones.length > 0 && <span>Ignored: <strong>{data.rules.ignore_zones.join(', ')}</strong></span>}
+          {!data.rules.enabled && <Badge variant="destructive" className="text-[9px]">Detection off</Badge>}
+        </div>
+      )}
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Card>
@@ -67,30 +102,23 @@ export default function LoadSheddingPlanner() {
       {urgent.length > 0 && (
         <section className="space-y-3">
           <h2 className="text-sm font-semibold text-destructive uppercase tracking-wider">Urgent</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {urgent.map((r) => (
-              <div key={r.recommendation_key} className="space-y-2">
-                <div className="flex items-center gap-2"><Badge variant="destructive">{r.title}</Badge></div>
-                <RationaleCard recommendationKey={r.recommendation_key} inputs={r.inputs} logic={r.logic} action={r.action} />
-              </div>
-            ))}
-          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">{urgent.map(renderRec)}</div>
         </section>
       )}
 
       {upcoming.length > 0 && (
         <section className="space-y-3">
           <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Watch-list</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {upcoming.map((r) => (
-              <div key={r.recommendation_key} className="space-y-2">
-                <div className="flex items-center gap-2"><Badge variant="secondary">{r.title}</Badge></div>
-                <RationaleCard recommendationKey={r.recommendation_key} inputs={r.inputs} logic={r.logic} action={r.action} />
-              </div>
-            ))}
-          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">{upcoming.map(renderRec)}</div>
         </section>
       )}
+
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+          <ClipboardList className="w-3.5 h-3.5" /> Action plans
+        </h2>
+        <OutageActionPlansBoard />
+      </section>
 
       {data.collisions.length > 0 && (
         <Card>
@@ -115,6 +143,9 @@ export default function LoadSheddingPlanner() {
           </CardContent>
         </Card>
       )}
+
+      <CreateActionPlanDialog open={!!planFor} onOpenChange={(v) => !v && setPlanFor(null)} recommendation={planFor} />
+      <CollisionRulesDialog open={rulesOpen} onOpenChange={setRulesOpen} />
     </div>
   );
 }

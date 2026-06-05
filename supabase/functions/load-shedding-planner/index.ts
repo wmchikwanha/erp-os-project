@@ -45,6 +45,7 @@ serve(async (req) => {
       { data: schedules },
       { data: checkouts },
       { data: assets },
+      { data: rulesRow },
     ] = await Promise.all([
       supabase
         .from("load_shedding_schedule")
@@ -67,9 +68,25 @@ serve(async (req) => {
         .from("assets")
         .select("id, name, category")
         .eq("user_id", userId),
+      supabase
+        .from("shift_collision_rules")
+        .select("min_overlap_hours, severity_threshold_hours, urgent_collision_count, auto_shift_minutes, ignore_zones, enabled")
+        .eq("user_id", userId)
+        .maybeSingle(),
     ]);
 
-    const allWindows = (windows || []) as Window[];
+    const rules = {
+      min_overlap_hours: rulesRow?.min_overlap_hours ?? 1,
+      severity_threshold_hours: rulesRow?.severity_threshold_hours ?? 4,
+      urgent_collision_count: rulesRow?.urgent_collision_count ?? 3,
+      auto_shift_minutes: rulesRow?.auto_shift_minutes ?? 60,
+      ignore_zones: (rulesRow?.ignore_zones ?? []) as string[],
+      enabled: rulesRow?.enabled ?? true,
+    };
+
+
+    const ignoreZones = new Set(rules.ignore_zones.map((z) => z.toLowerCase()));
+    const allWindows = ((windows || []) as Window[]).filter((w) => !ignoreZones.has(w.zone.toLowerCase()));
 
     // Daily roll-up of outage hours (per zone, summed)
     const dayMap: Record<string, { hours: number; zones: Set<string>; windows: Window[] }> = {};
@@ -90,7 +107,8 @@ serve(async (req) => {
       }))
       .sort((a, b) => a.date.localeCompare(b.date));
 
-    // Find shift collisions: scheduled work that overlaps with an outage window
+    // Find shift collisions: scheduled work that overlaps with an outage window,
+    // filtered by configurable minimum overlap.
     const collisions: Array<{
       schedule_id: string;
       work_date: string;
@@ -98,6 +116,7 @@ serve(async (req) => {
       zone: string;
       outage_window: string;
       overlap_hours: number;
+      severity: 'urgent' | 'upcoming';
     }> = [];
 
     for (const s of (schedules || []) as any[]) {
@@ -108,17 +127,21 @@ serve(async (req) => {
         if (overlaps(shiftStart, shiftEnd, w.start_time, w.end_time)) {
           const ovStart = new Date(Math.max(+new Date(shiftStart), +new Date(w.start_time))).toISOString();
           const ovEnd = new Date(Math.min(+new Date(shiftEnd), +new Date(w.end_time))).toISOString();
+          const overlap_hours = Math.round(hoursBetween(ovStart, ovEnd) * 10) / 10;
+          if (overlap_hours < rules.min_overlap_hours) continue;
           collisions.push({
             schedule_id: s.id,
             work_date: s.work_date,
             shift: `${s.shift_start}–${s.shift_end}`,
             zone: w.zone,
             outage_window: `${new Date(w.start_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}–${new Date(w.end_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`,
-            overlap_hours: Math.round(hoursBetween(ovStart, ovEnd) * 10) / 10,
+            overlap_hours,
+            severity: overlap_hours >= rules.severity_threshold_hours ? 'urgent' : 'upcoming',
           });
         }
       }
     }
+
 
     // Equipment exposure: count checked-out battery / power-sensitive assets
     const powerAssets = (assets || []).filter((a: any) =>
@@ -146,17 +169,23 @@ serve(async (req) => {
       });
     }
 
-    if (collisions.length) {
-      const c = collisions[0];
+    // One recommendation per collision so each one can become its own action plan
+    const urgentCount = collisions.filter((c) => c.severity === 'urgent').length;
+    for (const c of collisions.slice(0, 10)) {
+      const shiftMinutes = Math.max(rules.auto_shift_minutes, Math.ceil(c.overlap_hours * 60));
+      const earlier = `start ${shiftMinutes}m earlier (≈${(shiftMinutes / 60).toFixed(1)}h)`;
+      const later = `end ${shiftMinutes}m later (≈${(shiftMinutes / 60).toFixed(1)}h)`;
       recommendations.push({
-        recommendation_key: `loadshed-collision-${c.schedule_id}`,
-        severity: collisions.length >= 3 ? "urgent" : "upcoming",
-        title: `${collisions.length} shift(s) overlap an outage`,
-        inputs: `First clash: ${c.work_date} shift ${c.shift} hit by ${c.zone} outage ${c.outage_window} (${c.overlap_hours}h lost).`,
-        logic: `Crews on site without power lose billable hours and risk safety lighting gaps.`,
-        action: `Shift the affected crew earlier/later by ${Math.ceil(c.overlap_hours)}h or stage battery lighting before the window.`,
+        recommendation_key: `loadshed-collision-${c.schedule_id}-${c.zone}`,
+        severity: c.severity,
+        title: `Shift clash · ${c.work_date} · ${c.zone}`,
+        inputs: `Shift ${c.shift} overlaps ${c.zone} outage ${c.outage_window} for ${c.overlap_hours}h (rule: min ${rules.min_overlap_hours}h, urgent ≥ ${rules.severity_threshold_hours}h).`,
+        logic: `Crews on site without power lose billable hours and risk safety-lighting gaps. ${urgentCount >= rules.urgent_collision_count ? `Week-wide urgent clashes (${urgentCount}) exceed your threshold of ${rules.urgent_collision_count}.` : ''}`.trim(),
+        action: `Best option: ${earlier}. Alternative: ${later}, or stage battery lighting before the window starts.`,
+        source_collision_id: c.schedule_id,
       });
     }
+
 
     if (exposedAssets > 0) {
       recommendations.push({
@@ -191,6 +220,8 @@ serve(async (req) => {
         collisions: collisions.slice(0, 20),
         windows: allWindows.slice(0, 50),
         recommendations,
+        rules,
+
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
