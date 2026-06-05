@@ -85,7 +85,8 @@ serve(async (req) => {
     };
 
 
-    const allWindows = (windows || []) as Window[];
+    const ignoreZones = new Set(rules.ignore_zones.map((z) => z.toLowerCase()));
+    const allWindows = ((windows || []) as Window[]).filter((w) => !ignoreZones.has(w.zone.toLowerCase()));
 
     // Daily roll-up of outage hours (per zone, summed)
     const dayMap: Record<string, { hours: number; zones: Set<string>; windows: Window[] }> = {};
@@ -106,7 +107,8 @@ serve(async (req) => {
       }))
       .sort((a, b) => a.date.localeCompare(b.date));
 
-    // Find shift collisions: scheduled work that overlaps with an outage window
+    // Find shift collisions: scheduled work that overlaps with an outage window,
+    // filtered by configurable minimum overlap.
     const collisions: Array<{
       schedule_id: string;
       work_date: string;
@@ -114,6 +116,7 @@ serve(async (req) => {
       zone: string;
       outage_window: string;
       overlap_hours: number;
+      severity: 'urgent' | 'upcoming';
     }> = [];
 
     for (const s of (schedules || []) as any[]) {
@@ -124,17 +127,21 @@ serve(async (req) => {
         if (overlaps(shiftStart, shiftEnd, w.start_time, w.end_time)) {
           const ovStart = new Date(Math.max(+new Date(shiftStart), +new Date(w.start_time))).toISOString();
           const ovEnd = new Date(Math.min(+new Date(shiftEnd), +new Date(w.end_time))).toISOString();
+          const overlap_hours = Math.round(hoursBetween(ovStart, ovEnd) * 10) / 10;
+          if (overlap_hours < rules.min_overlap_hours) continue;
           collisions.push({
             schedule_id: s.id,
             work_date: s.work_date,
             shift: `${s.shift_start}–${s.shift_end}`,
             zone: w.zone,
             outage_window: `${new Date(w.start_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}–${new Date(w.end_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`,
-            overlap_hours: Math.round(hoursBetween(ovStart, ovEnd) * 10) / 10,
+            overlap_hours,
+            severity: overlap_hours >= rules.severity_threshold_hours ? 'urgent' : 'upcoming',
           });
         }
       }
     }
+
 
     // Equipment exposure: count checked-out battery / power-sensitive assets
     const powerAssets = (assets || []).filter((a: any) =>
