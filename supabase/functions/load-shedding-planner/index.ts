@@ -169,17 +169,23 @@ serve(async (req) => {
       });
     }
 
-    if (collisions.length) {
-      const c = collisions[0];
+    // One recommendation per collision so each one can become its own action plan
+    const urgentCount = collisions.filter((c) => c.severity === 'urgent').length;
+    for (const c of collisions.slice(0, 10)) {
+      const shiftMinutes = Math.max(rules.auto_shift_minutes, Math.ceil(c.overlap_hours * 60));
+      const earlier = `start ${shiftMinutes}m earlier (≈${(shiftMinutes / 60).toFixed(1)}h)`;
+      const later = `end ${shiftMinutes}m later (≈${(shiftMinutes / 60).toFixed(1)}h)`;
       recommendations.push({
-        recommendation_key: `loadshed-collision-${c.schedule_id}`,
-        severity: collisions.length >= 3 ? "urgent" : "upcoming",
-        title: `${collisions.length} shift(s) overlap an outage`,
-        inputs: `First clash: ${c.work_date} shift ${c.shift} hit by ${c.zone} outage ${c.outage_window} (${c.overlap_hours}h lost).`,
-        logic: `Crews on site without power lose billable hours and risk safety lighting gaps.`,
-        action: `Shift the affected crew earlier/later by ${Math.ceil(c.overlap_hours)}h or stage battery lighting before the window.`,
+        recommendation_key: `loadshed-collision-${c.schedule_id}-${c.zone}`,
+        severity: c.severity,
+        title: `Shift clash · ${c.work_date} · ${c.zone}`,
+        inputs: `Shift ${c.shift} overlaps ${c.zone} outage ${c.outage_window} for ${c.overlap_hours}h (rule: min ${rules.min_overlap_hours}h, urgent ≥ ${rules.severity_threshold_hours}h).`,
+        logic: `Crews on site without power lose billable hours and risk safety-lighting gaps. ${urgentCount >= rules.urgent_collision_count ? `Week-wide urgent clashes (${urgentCount}) exceed your threshold of ${rules.urgent_collision_count}.` : ''}`.trim(),
+        action: `Best option: ${earlier}. Alternative: ${later}, or stage battery lighting before the window starts.`,
+        source_collision_id: c.schedule_id,
       });
     }
+
 
     if (exposedAssets > 0) {
       recommendations.push({
