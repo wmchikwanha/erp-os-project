@@ -220,6 +220,8 @@ serve(async (req) => {
         collisions: collisions.slice(0, 20),
         windows: allWindows.slice(0, 50),
         recommendations,
+        rules,
+
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
