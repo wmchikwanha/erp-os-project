@@ -27,7 +27,9 @@ export interface LoadShedCollision {
   zone: string;
   outage_window: string;
   overlap_hours: number;
+  severity?: 'urgent' | 'upcoming';
 }
+
 
 export interface LoadShedWindow {
   id: string;
