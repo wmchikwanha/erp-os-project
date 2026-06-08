@@ -1176,6 +1176,36 @@ export type Database = {
           },
         ]
       }
+      plan_approval_settings: {
+        Row: {
+          allowed_roles: Database["public"]["Enums"]["app_role"][]
+          allowed_user_ids: string[]
+          created_at: string
+          department: string
+          label: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          allowed_roles?: Database["public"]["Enums"]["app_role"][]
+          allowed_user_ids?: string[]
+          created_at?: string
+          department: string
+          label: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          allowed_roles?: Database["public"]["Enums"]["app_role"][]
+          allowed_user_ids?: string[]
+          created_at?: string
+          department?: string
+          label?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           created_at: string
@@ -1864,6 +1894,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_approve_plan: {
+        Args: { _department: string; _user_id: string }
+        Returns: boolean
+      }
       get_auth_email: { Args: never; Returns: string }
       get_my_employee_id: { Args: never; Returns: string }
       has_role: {
