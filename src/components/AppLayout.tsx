@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Users, Handshake, CalendarCheck, Package,
   FileText, UserCog, BarChart3, Settings, ChevronLeft, Menu, LogOut, Home, FolderKanban,
   Building2, CalendarDays, PackageCheck, Wrench, TrendingDown, CreditCard, Timer, Receipt,
-  Activity, Sparkles, ShoppingCart, Shield, Zap,
+  Activity, Sparkles, ShoppingCart, Shield, Zap, ScrollText,
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -38,6 +38,7 @@ const ALL_NAV_ITEMS = [
   { to: '/sae/compliance', icon: Shield, label: 'Compliance Monitor', roles: ['admin', 'finance_manager', 'hr_manager'] },
   { to: '/sae/operations', icon: Zap, label: 'Load-Shedding Planner', roles: ['admin', 'procurement_manager', 'project_manager'] },
   { to: '/sae/control', icon: Sparkles, label: 'SAE Control', roles: ['admin', 'finance_manager'] },
+  { to: '/sae/audit', icon: ScrollText, label: 'SAE Audit Log', roles: ['admin', 'procurement_manager', 'hr_manager', 'project_manager', 'finance_manager'] },
 ];
 
 function getNavItems(role: string) {

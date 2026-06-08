@@ -33,6 +33,7 @@ import SAEControlPanel from "./pages/sae/SAEControlPanel";
 import ProcurementScout from "./pages/sae/ProcurementScout";
 import ComplianceMonitor from "./pages/sae/ComplianceMonitor";
 import LoadSheddingPlanner from "./pages/sae/LoadSheddingPlanner";
+import SAEAuditLog from "./pages/sae/SAEAuditLog";
 
 const queryClient = new QueryClient();
 
@@ -61,10 +62,12 @@ const DEPT_ROUTE_MAP: Record<string, { path: string; element: React.ReactNode }[
     { path: '/consumption', element: <Consumption /> },
     { path: '/sae/procurement', element: <ProcurementScout /> },
     { path: '/sae/operations', element: <LoadSheddingPlanner /> },
+    { path: '/sae/audit', element: <SAEAuditLog /> },
   ],
   hr_manager: [
     { path: '/hr', element: <HRPage /> },
     { path: '/sae/compliance', element: <ComplianceMonitor /> },
+    { path: '/sae/audit', element: <SAEAuditLog /> },
   ],
   project_manager: [
     { path: '/projects', element: <Projects /> },
@@ -72,6 +75,7 @@ const DEPT_ROUTE_MAP: Record<string, { path: string; element: React.ReactNode }[
     { path: '/scheduling', element: <Scheduling /> },
     { path: '/timesheets', element: <Timesheets /> },
     { path: '/sae/operations', element: <LoadSheddingPlanner /> },
+    { path: '/sae/audit', element: <SAEAuditLog /> },
   ],
   finance_manager: [
     { path: '/invoices', element: <Invoices /> },
@@ -80,6 +84,7 @@ const DEPT_ROUTE_MAP: Record<string, { path: string; element: React.ReactNode }[
     { path: '/sae/liquidity', element: <LiquidityGuardian /> },
     { path: '/sae/compliance', element: <ComplianceMonitor /> },
     { path: '/sae/control', element: <SAEControlPanel /> },
+    { path: '/sae/audit', element: <SAEAuditLog /> },
   ],
 };
 
@@ -152,6 +157,7 @@ function ProtectedRoutes() {
         <Route path="/sae/compliance" element={<ComplianceMonitor />} />
         <Route path="/sae/operations" element={<LoadSheddingPlanner />} />
         <Route path="/sae/control" element={<SAEControlPanel />} />
+        <Route path="/sae/audit" element={<SAEAuditLog />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
