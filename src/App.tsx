@@ -34,6 +34,7 @@ import ProcurementScout from "./pages/sae/ProcurementScout";
 import ComplianceMonitor from "./pages/sae/ComplianceMonitor";
 import LoadSheddingPlanner from "./pages/sae/LoadSheddingPlanner";
 import SAEAuditLog from "./pages/sae/SAEAuditLog";
+import ApprovalSettings from "./pages/settings/ApprovalSettings";
 
 const queryClient = new QueryClient();
 
@@ -158,6 +159,7 @@ function ProtectedRoutes() {
         <Route path="/sae/operations" element={<LoadSheddingPlanner />} />
         <Route path="/sae/control" element={<SAEControlPanel />} />
         <Route path="/sae/audit" element={<SAEAuditLog />} />
+        <Route path="/settings/approvals" element={<ApprovalSettings />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="*" element={<NotFound />} />
       </Routes>

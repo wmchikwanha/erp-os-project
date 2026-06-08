@@ -15,7 +15,7 @@ import {
 import { Trash2, ChevronDown, ChevronUp, Undo2, Check, X, ShieldCheck, Lock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { useRole, isDepartmentManager } from '@/hooks/useRole';
+import { useCanApprovePlan } from '@/hooks/usePlanApprovalSettings';
 import { toast } from '@/hooks/use-toast';
 
 const STATUS_LABELS: Record<PlanStatus, string> = {
@@ -38,8 +38,7 @@ export default function OutageActionPlansBoard() {
   const del = useDeleteOutageActionPlan();
   const approve = useApproveOutageActionPlan();
   const { user } = useAuth();
-  const { data: role } = useRole();
-  const canApprove = role === 'admin' || isDepartmentManager(role);
+  const { data: canApprove = false } = useCanApprovePlan('operations');
   const [expanded, setExpanded] = useState<string | null>(null);
   const [notes, setNotes] = useState<Record<string, string>>({});
 
