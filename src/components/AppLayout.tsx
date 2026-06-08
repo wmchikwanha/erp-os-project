@@ -39,6 +39,7 @@ const ALL_NAV_ITEMS = [
   { to: '/sae/operations', icon: Zap, label: 'Load-Shedding Planner', roles: ['admin', 'procurement_manager', 'project_manager'] },
   { to: '/sae/control', icon: Sparkles, label: 'SAE Control', roles: ['admin', 'finance_manager'] },
   { to: '/sae/audit', icon: ScrollText, label: 'SAE Audit Log', roles: ['admin', 'procurement_manager', 'hr_manager', 'project_manager', 'finance_manager'] },
+  { to: '/settings/approvals', icon: ShieldCheck, label: 'Approval Settings', roles: ['admin'] },
 ];
 
 function getNavItems(role: string) {
