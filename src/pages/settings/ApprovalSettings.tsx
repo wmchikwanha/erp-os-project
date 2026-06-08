@@ -47,16 +47,21 @@ function useRoleUsers() {
       if (error) throw error;
       const ids = Array.from(new Set((roles || []).map((r) => r.user_id)));
       if (!ids.length) return [];
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('user_id, full_name, email')
-        .in('user_id', ids);
-      const pm = new Map((profiles || []).map((p) => [p.user_id, p]));
+      const [{ data: profiles }, { data: employees }] = await Promise.all([
+        supabase.from('profiles').select('user_id, full_name').in('user_id', ids),
+        supabase.from('employees').select('user_id, email').in('user_id', ids),
+      ]);
+      const pm = new Map((profiles || []).map((p) => [p.user_id, p.full_name]));
+      const em = new Map(
+        (employees || [])
+          .filter((e): e is { user_id: string; email: string | null } => !!e.user_id)
+          .map((e) => [e.user_id, e.email]),
+      );
       return (roles || []).map((r) => ({
         user_id: r.user_id,
         role: r.role as AppRole,
-        full_name: pm.get(r.user_id)?.full_name ?? null,
-        email: pm.get(r.user_id)?.email ?? null,
+        full_name: pm.get(r.user_id) ?? null,
+        email: em.get(r.user_id) ?? null,
       }));
     },
   });
