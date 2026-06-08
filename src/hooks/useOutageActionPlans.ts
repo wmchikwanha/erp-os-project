@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 
 export type PlanStatus = 'pending' | 'in_progress' | 'done' | 'skipped';
+export type ApprovalStatus = 'pending_approval' | 'approved' | 'rejected';
 
 export interface OutageActionPlan {
   id: string;
@@ -13,6 +14,10 @@ export interface OutageActionPlan {
   description: string | null;
   severity: string;
   status: PlanStatus;
+  approval_status: ApprovalStatus;
+  approved_by: string | null;
+  approved_at: string | null;
+  rejection_reason: string | null;
   assigned_to: string | null;
   due_date: string | null;
   completion_notes: string | null;
@@ -22,6 +27,36 @@ export interface OutageActionPlan {
   rationale_action: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export function useApproveOutageActionPlan() {
+  const { user } = useAuth();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, decision, reason }: { id: string; decision: 'approved' | 'rejected'; reason?: string }) => {
+      if (!user) throw new Error('Not authenticated');
+      const patch: Record<string, unknown> = {
+        approval_status: decision,
+        approved_by: user.id,
+        approved_at: new Date().toISOString(),
+      };
+      if (decision === 'rejected') patch.rejection_reason = reason ?? null;
+      const { data, error } = await supabase
+        .from('outage_action_plans')
+        .update(patch)
+        .eq('id', id)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (_d, vars) => {
+      qc.invalidateQueries({ queryKey: ['outage-action-plans'] });
+      qc.invalidateQueries({ queryKey: ['sae-audit-log'] });
+      toast({ title: vars.decision === 'approved' ? 'Plan approved' : 'Plan rejected' });
+    },
+    onError: (e: Error) => toast({ title: 'Could not update approval', description: e.message, variant: 'destructive' }),
+  });
 }
 
 export function useOutageActionPlans() {
