@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Users, Handshake, CalendarCheck, Package,
   FileText, UserCog, BarChart3, Settings, ChevronLeft, Menu, LogOut, Home, FolderKanban,
   Building2, CalendarDays, PackageCheck, Wrench, TrendingDown, CreditCard, Timer, Receipt,
-  Activity, Sparkles, ShoppingCart, Shield, Zap, ScrollText,
+  Activity, Sparkles, ShoppingCart, Shield, Zap, ScrollText, ShieldCheck,
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
