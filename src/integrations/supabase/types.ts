@@ -1012,6 +1012,9 @@ export type Database = {
       }
       outage_action_plans: {
         Row: {
+          approval_status: Database["public"]["Enums"]["plan_approval_status"]
+          approved_at: string | null
+          approved_by: string | null
           assigned_to: string | null
           completion_notes: string | null
           created_at: string
@@ -1022,6 +1025,7 @@ export type Database = {
           rationale_inputs: string | null
           rationale_logic: string | null
           recommendation_key: string
+          rejection_reason: string | null
           severity: string
           source_collision_id: string | null
           status: string
@@ -1030,6 +1034,9 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          approval_status?: Database["public"]["Enums"]["plan_approval_status"]
+          approved_at?: string | null
+          approved_by?: string | null
           assigned_to?: string | null
           completion_notes?: string | null
           created_at?: string
@@ -1040,6 +1047,7 @@ export type Database = {
           rationale_inputs?: string | null
           rationale_logic?: string | null
           recommendation_key: string
+          rejection_reason?: string | null
           severity?: string
           source_collision_id?: string | null
           status?: string
@@ -1048,6 +1056,9 @@ export type Database = {
           user_id: string
         }
         Update: {
+          approval_status?: Database["public"]["Enums"]["plan_approval_status"]
+          approved_at?: string | null
+          approved_by?: string | null
           assigned_to?: string | null
           completion_notes?: string | null
           created_at?: string
@@ -1058,6 +1069,7 @@ export type Database = {
           rationale_inputs?: string | null
           rationale_logic?: string | null
           recommendation_key?: string
+          rejection_reason?: string | null
           severity?: string
           source_collision_id?: string | null
           status?: string
@@ -1438,6 +1450,42 @@ export type Database = {
           source_url?: string | null
           summary?: string | null
           title?: string
+        }
+        Relationships: []
+      }
+      sae_audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          after_data: Json | null
+          before_data: Json | null
+          created_at: string
+          entity_id: string | null
+          entity_type: string
+          id: string
+          summary: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          after_data?: Json | null
+          before_data?: Json | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          summary?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          after_data?: Json | null
+          before_data?: Json | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          summary?: string | null
         }
         Relationships: []
       }
@@ -1825,6 +1873,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_manager_or_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role:
@@ -1834,6 +1883,7 @@ export type Database = {
         | "hr_manager"
         | "project_manager"
         | "finance_manager"
+      plan_approval_status: "pending_approval" | "approved" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1969,6 +2019,7 @@ export const Constants = {
         "project_manager",
         "finance_manager",
       ],
+      plan_approval_status: ["pending_approval", "approved", "rejected"],
     },
   },
 } as const
