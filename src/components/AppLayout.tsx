@@ -61,7 +61,7 @@ export default function AppLayout({ children, role = 'admin' }: { children: Reac
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
-  const { user, signOut } = useAuth();
+  const { setRole } = useDemoRole();
 
   const navItems = getNavItems(role);
   const roleLabel = getRoleLabel(role);
