@@ -25,6 +25,11 @@ const MODULES = [
   { name: 'Invoices, Payments, Expenses', desc: 'Issue invoices, log payments, track operational expenses with approvals.' },
   { name: 'HR (Employees, Leave, Reviews, Positions, Recruitment)', desc: 'Full employee lifecycle — onboarding, leave, performance, hiring pipeline with CV repository.' },
   { name: 'Reports', desc: 'Aging analysis, P&L trends, deal funnel, depreciation, hours by project, expense breakdowns.' },
+  { name: 'SAE — Liquidity Guardian', desc: 'Forward cash forecast using official and parallel currency rates, flags shortfalls and suggests action.' },
+  { name: 'SAE — Procurement Scout', desc: 'Price benchmarking against supplier quotes, normalized to USD, with alerts when prices spike.' },
+  { name: 'SAE — Compliance Monitor', desc: 'Regulatory and tax deadline tracker filtered by your industry, with urgency scoring.' },
+  { name: 'SAE — Load-Shedding Planner', desc: 'Correlates ZESA outages with shifts and power-sensitive equipment, recommends schedule changes.' },
+  { name: 'SAE — Audit Log', desc: 'Immutable record of every rule change, override, and plan approval decision.' },
 ];
 
 export default function HelpDialog() {
