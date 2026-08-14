@@ -1,13 +1,14 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Users, Handshake, CalendarCheck, Package,
-  FileText, UserCog, BarChart3, Settings, ChevronLeft, Menu, LogOut, Home, FolderKanban,
+  FileText, UserCog, BarChart3, Settings, ChevronLeft, Menu, Repeat, Home, FolderKanban,
   Building2, CalendarDays, PackageCheck, Wrench, TrendingDown, CreditCard, Timer, Receipt,
   Activity, Sparkles, ShoppingCart, Shield, Zap, ScrollText, ShieldCheck,
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { useAuth } from '@/hooks/useAuth';
+import { useDemoRole } from '@/hooks/useDemoRole';
+
 import AskAIPanel from '@/components/AskAIPanel';
 import NotificationsPanel from '@/components/NotificationsPanel';
 import HelpDialog from '@/components/HelpDialog';
