@@ -4,7 +4,10 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
-import { useRole, isDepartmentManager } from "@/hooks/useRole";
+import { DemoRoleProvider, useDemoRole } from "@/hooks/useDemoRole";
+import { isDepartmentManager } from "@/hooks/useRole";
+import RoleSelect from "./pages/RoleSelect";
+
 import AppLayout from "@/components/AppLayout";
 import Dashboard from "./pages/Dashboard";
 import Contacts from "./pages/Contacts";
