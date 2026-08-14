@@ -14,22 +14,13 @@ const ROLE_ROUTES: Record<string, string[]> = {
 };
 
 export function useRole() {
-  const { user } = useAuth();
-  return useQuery({
-    queryKey: ['user_role', user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user!.id)
-        .limit(1)
-        .maybeSingle();
-      if (error) throw error;
-      return (data?.role as AppRole) ?? null;
-    },
-    enabled: !!user,
-  });
+  // Demo mode: the active role is chosen by the visitor, not looked up from the database.
+  const role = (typeof localStorage !== 'undefined'
+    ? (localStorage.getItem('stratedge_demo_role') as AppRole | null)
+    : null);
+  return { data: role, isLoading: false } as { data: AppRole | null; isLoading: boolean };
 }
+
 
 export function useIsAdmin() {
   const { data: role, isLoading } = useRole();
