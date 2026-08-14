@@ -41,21 +41,6 @@ import ApprovalSettings from "./pages/settings/ApprovalSettings";
 
 const queryClient = new QueryClient();
 
-function PendingApproval() {
-  const { signOut } = useAuth();
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4">
-      <div className="w-12 h-12 rounded-lg bg-primary flex items-center justify-center">
-        <span className="text-lg font-bold text-primary-foreground">S</span>
-      </div>
-      <h1 className="text-lg font-semibold">Pending Approval</h1>
-      <p className="text-sm text-muted-foreground max-w-sm text-center">
-        Your account is awaiting role assignment by an administrator. Please check back later.
-      </p>
-      <button onClick={signOut} className="text-sm text-primary hover:underline mt-2">Sign Out</button>
-    </div>
-  );
-}
 
 const DEPT_ROUTE_MAP: Record<string, { path: string; element: React.ReactNode }[]> = {
   procurement_manager: [
