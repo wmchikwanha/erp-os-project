@@ -133,12 +133,13 @@ export default function AppLayout({ children, role = 'admin' }: { children: Reac
             <NavLink to="/settings" className="p-1.5 rounded-md hover:bg-muted text-muted-foreground"><Settings className="w-4 h-4" /></NavLink>
             <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
               <span className="text-xs font-medium text-primary-foreground">
-                {user?.user_metadata?.full_name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2) || user?.email?.charAt(0).toUpperCase() || '?'}
+                {(roleLabel || 'Demo').charAt(0)}
               </span>
             </div>
-            <button onClick={signOut} className="p-1.5 rounded-md hover:bg-muted text-muted-foreground" title="Sign Out">
-              <LogOut className="w-4 h-4" />
+            <button onClick={() => setRole(null)} className="p-1.5 rounded-md hover:bg-muted text-muted-foreground" title="Switch role">
+              <Repeat className="w-4 h-4" />
             </button>
+
           </div>
         </header>
 
