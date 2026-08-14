@@ -90,10 +90,10 @@ const DEPT_ROUTE_MAP: Record<string, { path: string; element: React.ReactNode }[
 };
 
 function ProtectedRoutes() {
-  const { session, loading } = useAuth();
-  const { data: role, isLoading: roleLoading } = useRole();
+  const { loading } = useAuth();
+  const { role } = useDemoRole();
 
-  if (loading || roleLoading) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center animate-pulse">
@@ -103,8 +103,7 @@ function ProtectedRoutes() {
     );
   }
 
-  if (!session) return <Navigate to="/auth" replace />;
-  if (!role) return <PendingApproval />;
+  if (!role) return <RoleSelect />;
 
   if (isDepartmentManager(role)) {
     const routes = DEPT_ROUTE_MAP[role] || [];
@@ -131,6 +130,7 @@ function ProtectedRoutes() {
       </AppLayout>
     );
   }
+
 
   // Admin: everything
   return (
