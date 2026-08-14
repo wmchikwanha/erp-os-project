@@ -72,7 +72,8 @@ export default function HelpDialog() {
               <li><strong className="text-foreground">Create projects & sites:</strong> Link deals to delivery, assign managers and resources.</li>
               <li><strong className="text-foreground">Operate daily:</strong> Schedule shifts, log timesheets, check out equipment, log expenses.</li>
               <li><strong className="text-foreground">Bill and collect:</strong> Issue invoices, record payments, monitor AR aging on the Dashboard.</li>
-              <li><strong className="text-foreground">Review:</strong> Use Reports for P&L, deal funnel, depreciation and operational analytics.</li>
+              <li><strong className="text-foreground">Watch SAE signals:</strong> Open Liquidity Guardian, Procurement Scout, Compliance Monitor, and Load-Shedding Planner to see risks before they become crises.</li>
+              <li><strong className="text-foreground">Review:</strong> Use Reports and the SAE Audit Log for P&L, deal funnel, depreciation, and operational analytics.</li>
             </ol>
           </TabsContent>
 
