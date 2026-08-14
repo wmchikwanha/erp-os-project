@@ -1,6 +1,3 @@
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from './useAuth';
 
 export type AppRole = 'admin' | 'employee' | 'procurement_manager' | 'hr_manager' | 'project_manager' | 'finance_manager';
 
