@@ -27,8 +27,6 @@ import Consumption from "./pages/Consumption";
 import Timesheets from "./pages/Timesheets";
 import Expenses from "./pages/Expenses";
 import EmployeePortal from "./pages/EmployeePortal";
-import Auth from "./pages/Auth";
-import ResetPassword from "./pages/ResetPassword";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import LiquidityGuardian from "./pages/sae/LiquidityGuardian";
