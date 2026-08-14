@@ -4,7 +4,10 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
-import { useRole, isDepartmentManager } from "@/hooks/useRole";
+import { DemoRoleProvider, useDemoRole } from "@/hooks/useDemoRole";
+import { isDepartmentManager } from "@/hooks/useRole";
+import RoleSelect from "./pages/RoleSelect";
+
 import AppLayout from "@/components/AppLayout";
 import Dashboard from "./pages/Dashboard";
 import Contacts from "./pages/Contacts";
@@ -24,8 +27,6 @@ import Consumption from "./pages/Consumption";
 import Timesheets from "./pages/Timesheets";
 import Expenses from "./pages/Expenses";
 import EmployeePortal from "./pages/EmployeePortal";
-import Auth from "./pages/Auth";
-import ResetPassword from "./pages/ResetPassword";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import LiquidityGuardian from "./pages/sae/LiquidityGuardian";
@@ -38,21 +39,6 @@ import ApprovalSettings from "./pages/settings/ApprovalSettings";
 
 const queryClient = new QueryClient();
 
-function PendingApproval() {
-  const { signOut } = useAuth();
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4">
-      <div className="w-12 h-12 rounded-lg bg-primary flex items-center justify-center">
-        <span className="text-lg font-bold text-primary-foreground">S</span>
-      </div>
-      <h1 className="text-lg font-semibold">Pending Approval</h1>
-      <p className="text-sm text-muted-foreground max-w-sm text-center">
-        Your account is awaiting role assignment by an administrator. Please check back later.
-      </p>
-      <button onClick={signOut} className="text-sm text-primary hover:underline mt-2">Sign Out</button>
-    </div>
-  );
-}
 
 const DEPT_ROUTE_MAP: Record<string, { path: string; element: React.ReactNode }[]> = {
   procurement_manager: [
@@ -90,10 +76,10 @@ const DEPT_ROUTE_MAP: Record<string, { path: string; element: React.ReactNode }[
 };
 
 function ProtectedRoutes() {
-  const { session, loading } = useAuth();
-  const { data: role, isLoading: roleLoading } = useRole();
+  const { loading } = useAuth();
+  const { role } = useDemoRole();
 
-  if (loading || roleLoading) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center animate-pulse">
@@ -103,8 +89,7 @@ function ProtectedRoutes() {
     );
   }
 
-  if (!session) return <Navigate to="/auth" replace />;
-  if (!role) return <PendingApproval />;
+  if (!role) return <RoleSelect />;
 
   if (isDepartmentManager(role)) {
     const routes = DEPT_ROUTE_MAP[role] || [];
@@ -131,6 +116,7 @@ function ProtectedRoutes() {
       </AppLayout>
     );
   }
+
 
   // Admin: everything
   return (
@@ -167,13 +153,6 @@ function ProtectedRoutes() {
   );
 }
 
-function AuthRoute() {
-  const { session, loading } = useAuth();
-  if (loading) return null;
-  if (session) return <Navigate to="/" replace />;
-  return <Auth />;
-}
-
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -181,15 +160,17 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <Routes>
-            <Route path="/auth" element={<AuthRoute />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/*" element={<ProtectedRoutes />} />
-          </Routes>
+          <DemoRoleProvider>
+            <Routes>
+              <Route path="/auth" element={<Navigate to="/" replace />} />
+              <Route path="/*" element={<ProtectedRoutes />} />
+            </Routes>
+          </DemoRoleProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
 );
+
 
 export default App;
