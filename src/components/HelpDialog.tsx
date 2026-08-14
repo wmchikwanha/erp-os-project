@@ -5,6 +5,12 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const FAQS = [
+  { q: 'What is the Situational Awareness Engine (SAE)?', a: 'SAE is a set of AI-assisted decision tools built for volatile markets: Liquidity Guardian, Procurement Scout, Compliance Monitor, and Load-Shedding Planner. Each module surfaces risks and recommends actions with a clear rationale card.' },
+  { q: 'How does the Liquidity Guardian work?', a: 'It projects your cash position over the next 30 days using unpaid invoices, upcoming expenses, and tax obligations. It shows both official and parallel currency rates and warns you about shortfalls before they happen.' },
+  { q: 'What does the Procurement Scout compare?', a: 'It captures supplier quotes for material baskets, normalizes prices to USD using the parallel rate, and flags quotes that are significantly above your running average so you can negotiate before buying.' },
+  { q: 'How does the Compliance Monitor track deadlines?', a: 'It keeps a calendar of tax and regulatory obligations filtered by your industry and jurisdiction, scores them by urgency, and shows what records you need to file on time.' },
+  { q: 'What does the Load-Shedding Planner do?', a: 'It correlates ZESA outage windows with employee work schedules and power-sensitive equipment, then recommends schedule changes or action plans so operations keep moving.' },
+  { q: 'How do action plans and approvals work?', a: 'Managers and admins can convert SAE recommendations into action plans. Each plan must be approved before tasks are assigned, and every approval, rejection, and rule change is recorded in the SAE Audit Log.' },
   { q: 'How do I add a new employee?', a: 'Go to HR → Employees → Invite Employee. Enter their email and assign a role. They will receive credentials to sign in.' },
   { q: 'How do I record a customer payment?', a: 'Open Payments → New Payment. Select the related invoice; the invoice status updates automatically once fully paid.' },
   { q: 'How do I upload candidate CVs?', a: 'Go to HR → Recruitment → Upload CV. Optionally link to an open Position created under HR → Positions.' },
