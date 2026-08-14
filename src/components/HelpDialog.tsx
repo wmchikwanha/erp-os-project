@@ -5,6 +5,12 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const FAQS = [
+  { q: 'What is the Situational Awareness Engine (SAE)?', a: 'SAE is a set of AI-assisted decision tools built for volatile markets: Liquidity Guardian, Procurement Scout, Compliance Monitor, and Load-Shedding Planner. Each module surfaces risks and recommends actions with a clear rationale card.' },
+  { q: 'How does the Liquidity Guardian work?', a: 'It projects your cash position over the next 30 days using unpaid invoices, upcoming expenses, and tax obligations. It shows both official and parallel currency rates and warns you about shortfalls before they happen.' },
+  { q: 'What does the Procurement Scout compare?', a: 'It captures supplier quotes for material baskets, normalizes prices to USD using the parallel rate, and flags quotes that are significantly above your running average so you can negotiate before buying.' },
+  { q: 'How does the Compliance Monitor track deadlines?', a: 'It keeps a calendar of tax and regulatory obligations filtered by your industry and jurisdiction, scores them by urgency, and shows what records you need to file on time.' },
+  { q: 'What does the Load-Shedding Planner do?', a: 'It correlates ZESA outage windows with employee work schedules and power-sensitive equipment, then recommends schedule changes or action plans so operations keep moving.' },
+  { q: 'How do action plans and approvals work?', a: 'Managers and admins can convert SAE recommendations into action plans. Each plan must be approved before tasks are assigned, and every approval, rejection, and rule change is recorded in the SAE Audit Log.' },
   { q: 'How do I add a new employee?', a: 'Go to HR → Employees → Invite Employee. Enter their email and assign a role. They will receive credentials to sign in.' },
   { q: 'How do I record a customer payment?', a: 'Open Payments → New Payment. Select the related invoice; the invoice status updates automatically once fully paid.' },
   { q: 'How do I upload candidate CVs?', a: 'Go to HR → Recruitment → Upload CV. Optionally link to an open Position created under HR → Positions.' },
@@ -25,6 +31,11 @@ const MODULES = [
   { name: 'Invoices, Payments, Expenses', desc: 'Issue invoices, log payments, track operational expenses with approvals.' },
   { name: 'HR (Employees, Leave, Reviews, Positions, Recruitment)', desc: 'Full employee lifecycle — onboarding, leave, performance, hiring pipeline with CV repository.' },
   { name: 'Reports', desc: 'Aging analysis, P&L trends, deal funnel, depreciation, hours by project, expense breakdowns.' },
+  { name: 'SAE — Liquidity Guardian', desc: 'Forward cash forecast using official and parallel currency rates, flags shortfalls and suggests action.' },
+  { name: 'SAE — Procurement Scout', desc: 'Price benchmarking against supplier quotes, normalized to USD, with alerts when prices spike.' },
+  { name: 'SAE — Compliance Monitor', desc: 'Regulatory and tax deadline tracker filtered by your industry, with urgency scoring.' },
+  { name: 'SAE — Load-Shedding Planner', desc: 'Correlates ZESA outages with shifts and power-sensitive equipment, recommends schedule changes.' },
+  { name: 'SAE — Audit Log', desc: 'Immutable record of every rule change, override, and plan approval decision.' },
 ];
 
 export default function HelpDialog() {
@@ -61,7 +72,8 @@ export default function HelpDialog() {
               <li><strong className="text-foreground">Create projects & sites:</strong> Link deals to delivery, assign managers and resources.</li>
               <li><strong className="text-foreground">Operate daily:</strong> Schedule shifts, log timesheets, check out equipment, log expenses.</li>
               <li><strong className="text-foreground">Bill and collect:</strong> Issue invoices, record payments, monitor AR aging on the Dashboard.</li>
-              <li><strong className="text-foreground">Review:</strong> Use Reports for P&L, deal funnel, depreciation and operational analytics.</li>
+              <li><strong className="text-foreground">Watch SAE signals:</strong> Open Liquidity Guardian, Procurement Scout, Compliance Monitor, and Load-Shedding Planner to see risks before they become crises.</li>
+              <li><strong className="text-foreground">Review:</strong> Use Reports and the SAE Audit Log for P&L, deal funnel, depreciation, and operational analytics.</li>
             </ol>
           </TabsContent>
 
