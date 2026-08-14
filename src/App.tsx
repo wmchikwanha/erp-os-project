@@ -155,13 +155,6 @@ function ProtectedRoutes() {
   );
 }
 
-function AuthRoute() {
-  const { session, loading } = useAuth();
-  if (loading) return null;
-  if (session) return <Navigate to="/" replace />;
-  return <Auth />;
-}
-
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -169,15 +162,17 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <Routes>
-            <Route path="/auth" element={<AuthRoute />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/*" element={<ProtectedRoutes />} />
-          </Routes>
+          <DemoRoleProvider>
+            <Routes>
+              <Route path="/auth" element={<Navigate to="/" replace />} />
+              <Route path="/*" element={<ProtectedRoutes />} />
+            </Routes>
+          </DemoRoleProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
 );
+
 
 export default App;
