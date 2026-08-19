@@ -21,7 +21,7 @@ export default function RoleSelect() {
           <div className="w-12 h-12 rounded-lg bg-primary flex items-center justify-center mx-auto mb-4">
             <span className="text-lg font-bold text-primary-foreground">S</span>
           </div>
-          <h1 className="text-xl font-semibold">StratedgeOS CRM — Live Demo</h1>
+          <h1 className="text-xl font-semibold">StratedgeOS ERP — Live Demo</h1>
           <p className="text-sm text-muted-foreground mt-1">
             No sign-up required. Pick a role to explore the suite from that perspective.
           </p>
