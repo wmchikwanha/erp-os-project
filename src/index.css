@@ -127,30 +127,46 @@
 
 @layer components {
   .kpi-card {
-    @apply bg-card border border-border rounded-lg p-5 transition-shadow hover:shadow-md;
+    @apply relative overflow-hidden bg-card border border-border rounded-md p-5 shadow-subtle transition-all duration-200 hover:shadow-elevated hover:-translate-y-0.5;
+    background-image: var(--gradient-surface);
+  }
+
+  .kpi-card::before {
+    content: '';
+    @apply absolute inset-x-0 top-0 h-px opacity-70;
+    background-image: var(--gradient-accent);
   }
 
   .kanban-column {
-    @apply bg-muted/50 rounded-lg p-3 min-h-[400px];
+    @apply bg-muted/60 border border-border/60 rounded-md p-3 min-h-[400px];
   }
 
   .kanban-card {
-    @apply bg-card border border-border rounded-md p-3 cursor-grab active:cursor-grabbing shadow-sm hover:shadow-md transition-all;
+    @apply bg-card border border-border rounded-md p-3 cursor-grab active:cursor-grabbing shadow-subtle hover:shadow-elevated transition-all;
   }
 
   .nav-item {
-    @apply flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors;
+    @apply relative flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors;
   }
 
   .nav-item-active {
     @apply bg-sidebar-accent text-sidebar-accent-foreground;
   }
 
+  .nav-item-active::before {
+    content: '';
+    @apply absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full bg-sidebar-primary;
+  }
+
   .table-header {
-    @apply text-xs font-semibold uppercase tracking-wider text-muted-foreground;
+    @apply text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground;
   }
 
   .status-badge {
     @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .surface-ink {
+    background-image: var(--gradient-ink);
   }
 }
