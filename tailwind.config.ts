@@ -79,6 +79,15 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      boxShadow: {
+        subtle: "var(--shadow-subtle)",
+        elevated: "var(--shadow-elevated)",
+      },
+      backgroundImage: {
+        "gradient-surface": "var(--gradient-surface)",
+        "gradient-ink": "var(--gradient-ink)",
+        "gradient-accent": "var(--gradient-accent)",
+      },
       keyframes: {
         "accordion-down": {
           from: { height: "0" },

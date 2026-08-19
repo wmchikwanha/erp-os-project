@@ -165,7 +165,7 @@ export default function AskAIPanel() {
                 <Sparkles className="w-6 h-6 text-primary" />
               </div>
               <h4 className="font-semibold text-foreground text-sm">Ask me anything about your business</h4>
-              <p className="text-xs text-muted-foreground mt-1">I have full access to your CRM, HR, invoices, products & deals</p>
+              <p className="text-xs text-muted-foreground mt-1">I have full access to your operations, HR, invoices, products & deals</p>
             </div>
             <div className="space-y-2">
               <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground px-1">Quick actions</p>

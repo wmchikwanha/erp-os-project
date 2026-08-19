@@ -84,7 +84,7 @@ export default function AppLayout({ children, role = 'admin' }: { children: Reac
           </div>
           {!collapsed && (
             <div className="animate-fade-in">
-              <h1 className="text-sm font-semibold text-sidebar-accent-foreground">StratedgeOS CRM</h1>
+              <h1 className="text-sm font-semibold text-sidebar-accent-foreground">StratedgeOS ERP</h1>
               <p className="text-[10px] text-sidebar-foreground/60">{role === 'admin' ? 'Enterprise Suite' : 'Employee Portal'}</p>
             </div>
           )}
@@ -123,7 +123,7 @@ export default function AppLayout({ children, role = 'admin' }: { children: Reac
               <Menu className="w-5 h-5" />
             </button>
             <h2 className="text-sm font-semibold">
-              {navItems.find((n) => n.to === location.pathname)?.label || 'StratedgeOS CRM'}
+              {navItems.find((n) => n.to === location.pathname)?.label || 'StratedgeOS ERP'}
             </h2>
             {roleLabel && <span className="status-badge bg-info/10 text-info text-[10px]">{roleLabel}</span>}
           </div>

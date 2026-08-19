@@ -23,7 +23,7 @@ const FAQS = [
 
 const MODULES = [
   { name: 'Dashboard', desc: 'KPIs, AR aging, cash flow forecast, workforce utilization, recruitment snapshot, quick actions.' },
-  { name: 'Contacts & Deals', desc: 'CRM pipeline — track leads, customers, suppliers, and the deals attached to them.' },
+  { name: 'Contacts & Deals', desc: 'Sales pipeline — track leads, customers, suppliers, and the deals attached to them.' },
   { name: 'Projects & Sites', desc: 'Manage active projects, link them to client deals, assign managers, track sites in the field.' },
   { name: 'Scheduling & Timesheets', desc: 'Schedule shifts per employee/site, then capture actual hours worked for approval.' },
   { name: 'Equipment, Maintenance, Consumption', desc: 'Asset register, checkouts to workers, scheduled maintenance, inventory drawdowns per project.' },
@@ -64,7 +64,7 @@ export default function HelpDialog() {
 
           <TabsContent value="getting-started" className="space-y-3 text-sm pt-4">
             <p className="text-muted-foreground">
-              Welcome to <strong className="text-foreground">StratedgeOS</strong> — an integrated CRM/ERP suite built for SMEs.
+              Welcome to <strong className="text-foreground">StratedgeOS</strong> — an integrated ERP suite built for SMEs.
             </p>
             <ol className="list-decimal pl-5 space-y-2 text-muted-foreground">
               <li><strong className="text-foreground">Set up your team:</strong> HR → Employees → Invite Employee. Assign roles to control access.</li>
