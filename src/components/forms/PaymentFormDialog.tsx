@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { NumberInput } from '@/components/ui/number-input';
 
 interface Props {
   open: boolean;
@@ -41,7 +42,7 @@ export function PaymentFormDialog({ open, onOpenChange, onSubmit, loading, invoi
               </SelectContent>
             </Select>
           </div>
-          <div><Label>Amount</Label><Input type="number" value={form.amount} onChange={e => setForm({ ...form, amount: e.target.value })} /></div>
+          <div><Label>Amount</Label><NumberInput  value={form.amount} onValueChange={(n, raw) => setForm({ ...form, amount: raw })} /></div>
           <div><Label>Date</Label><Input type="date" value={form.payment_date} onChange={e => setForm({ ...form, payment_date: e.target.value })} /></div>
           <div>
             <Label>Method</Label>

@@ -13,6 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
+import { NumberInput } from '@/components/ui/number-input';
 
 function Countdown({ days }: { days: number }) {
   const tone = days <= 3 ? 'bg-destructive text-destructive-foreground'
@@ -125,7 +126,7 @@ function TaxCalendar() {
       <div className="grid grid-cols-2 md:grid-cols-7 gap-2 items-end">
         <div className="col-span-2"><Label className="text-xs">Name</Label><Input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder="VAT Aug" /></div>
         <div><Label className="text-xs">Authority</Label><Input value={draft.authority} onChange={(e) => setDraft({ ...draft, authority: e.target.value })} /></div>
-        <div><Label className="text-xs">Amount</Label><Input type="number" value={draft.amount} onChange={(e) => setDraft({ ...draft, amount: Number(e.target.value) })} /></div>
+        <div><Label className="text-xs">Amount</Label><NumberInput  value={draft.amount} onValueChange={n => setDraft({ ...draft, amount: n })} /></div>
         <div>
           <Label className="text-xs">Ccy</Label>
           <Select value={draft.currency} onValueChange={(v) => setDraft({ ...draft, currency: v })}>

@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { NumberInput } from '@/components/ui/number-input';
 
 interface Props {
   open: boolean;
@@ -46,7 +47,7 @@ export function ExpenseFormDialog({ open, onOpenChange, onSubmit, loading, emplo
               <SelectContent>{categories.map(c => <SelectItem key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</SelectItem>)}</SelectContent>
             </Select>
           </div>
-          <div><Label>Amount</Label><Input type="number" value={form.amount} onChange={e => setForm({ ...form, amount: e.target.value })} /></div>
+          <div><Label>Amount</Label><NumberInput  value={form.amount} onValueChange={(n, raw) => setForm({ ...form, amount: raw })} /></div>
           <div><Label>Date</Label><Input type="date" value={form.expense_date} onChange={e => setForm({ ...form, expense_date: e.target.value })} /></div>
           <div>
             <Label>Project (optional)</Label>

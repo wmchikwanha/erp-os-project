@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Trash2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { NumberInput } from '@/components/ui/number-input';
 
 interface Rate { id: string; currency: string; official_rate: number; parallel_rate: number; effective_date: string; source: string | null }
 interface Tax { id: string; name: string; authority: string; amount: number; currency: string; due_date: string; status: string }
@@ -53,8 +54,8 @@ export default function SAEControlPanel() {
         <CardContent className="space-y-3">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
             <Input value={newRate.currency} onChange={(e) => setNewRate({ ...newRate, currency: e.target.value.toUpperCase() })} placeholder="USD" />
-            <Input type="number" step="0.01" value={newRate.official_rate} onChange={(e) => setNewRate({ ...newRate, official_rate: Number(e.target.value) })} placeholder="Official" />
-            <Input type="number" step="0.01" value={newRate.parallel_rate} onChange={(e) => setNewRate({ ...newRate, parallel_rate: Number(e.target.value) })} placeholder="Parallel" />
+            <NumberInput  step="0.01" value={newRate.official_rate}  placeholder="Official" onValueChange={n => setNewRate({ ...newRate, official_rate: n })} />
+            <NumberInput  step="0.01" value={newRate.parallel_rate}  placeholder="Parallel" onValueChange={n => setNewRate({ ...newRate, parallel_rate: n })} />
             <Input value={newRate.source} onChange={(e) => setNewRate({ ...newRate, source: e.target.value })} placeholder="Source" />
             <Button onClick={addRate} size="sm">Add rate</Button>
           </div>
@@ -86,7 +87,7 @@ export default function SAEControlPanel() {
           <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
             <Input value={newTax.name} onChange={(e) => setNewTax({ ...newTax, name: e.target.value })} placeholder="e.g. PAYE June" className="md:col-span-2" />
             <Input value={newTax.authority} onChange={(e) => setNewTax({ ...newTax, authority: e.target.value })} placeholder="ZIMRA" />
-            <Input type="number" value={newTax.amount} onChange={(e) => setNewTax({ ...newTax, amount: Number(e.target.value) })} placeholder="Amount" />
+            <NumberInput  value={newTax.amount}  placeholder="Amount" onValueChange={n => setNewTax({ ...newTax, amount: n })} />
             <Input type="date" value={newTax.due_date} onChange={(e) => setNewTax({ ...newTax, due_date: e.target.value })} />
             <Button onClick={addTax} size="sm">Add</Button>
           </div>

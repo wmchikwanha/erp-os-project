@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { NumberInput } from '@/components/ui/number-input';
 
 interface Props {
   open: boolean;
@@ -43,7 +44,7 @@ export function ConsumptionFormDialog({ open, onOpenChange, onSubmit, loading, p
             {selectedProduct && <p className="text-[10px] text-muted-foreground mt-1">Current stock: {selectedProduct.stock}</p>}
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div><Label>Quantity *</Label><Input type="number" min={1} max={selectedProduct?.stock ?? 9999} value={form.quantity} onChange={e => setForm(f => ({ ...f, quantity: Number(e.target.value) }))} /></div>
+            <div><Label>Quantity *</Label><NumberInput  min={1} max={selectedProduct?.stock ?? 9999} value={form.quantity} onValueChange={n => setForm(f => ({ ...f, quantity: n }))} /></div>
             <div><Label>Date</Label><Input type="date" value={form.consumption_date} onChange={e => setForm(f => ({ ...f, consumption_date: e.target.value }))} /></div>
           </div>
           <div>

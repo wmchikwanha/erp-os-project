@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { NumberInput } from '@/components/ui/number-input';
 
 interface ProductFormProps {
   open: boolean;
@@ -39,11 +40,11 @@ export function ProductFormDialog({ open, onOpenChange, onSubmit, initialData, l
           <div><Label>Name *</Label><Input required value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} /></div>
           <div className="grid grid-cols-2 gap-3">
             <div><Label>SKU</Label><Input value={form.sku} onChange={e => setForm(f => ({ ...f, sku: e.target.value }))} /></div>
-            <div><Label>Unit Price</Label><Input type="number" min={0} step={0.01} value={form.unit_price} onChange={e => setForm(f => ({ ...f, unit_price: Number(e.target.value) }))} /></div>
+            <div><Label>Unit Price</Label><NumberInput  min={0} step={0.01} value={form.unit_price} onValueChange={n => setForm(f => ({ ...f, unit_price: n }))} /></div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div><Label>Stock Qty</Label><Input type="number" min={0} value={form.stock_quantity} onChange={e => setForm(f => ({ ...f, stock_quantity: Number(e.target.value) }))} /></div>
-            <div><Label>Reorder Level</Label><Input type="number" min={0} value={form.reorder_level} onChange={e => setForm(f => ({ ...f, reorder_level: Number(e.target.value) }))} /></div>
+            <div><Label>Stock Qty</Label><NumberInput  min={0} value={form.stock_quantity} onValueChange={n => setForm(f => ({ ...f, stock_quantity: n }))} /></div>
+            <div><Label>Reorder Level</Label><NumberInput  min={0} value={form.reorder_level} onValueChange={n => setForm(f => ({ ...f, reorder_level: n }))} /></div>
           </div>
           <div><Label>Description</Label><Textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={2} /></div>
           <DialogFooter>

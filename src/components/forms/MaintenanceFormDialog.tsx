@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { NumberInput } from '@/components/ui/number-input';
 
 const TYPES = ['inspection', 'scheduled', 'repair'];
 const STATUSES = ['scheduled', 'in-progress', 'completed'];
@@ -69,8 +70,8 @@ export function MaintenanceFormDialog({ open, onOpenChange, onSubmit, initialDat
           </div>
           <div className="grid grid-cols-3 gap-3">
             <div><Label>Performed By</Label><Input value={form.performed_by} onChange={e => setForm(f => ({ ...f, performed_by: e.target.value }))} /></div>
-            <div><Label>Cost ($)</Label><Input type="number" min={0} step={0.01} value={form.cost} onChange={e => setForm(f => ({ ...f, cost: Number(e.target.value) }))} /></div>
-            <div><Label>Downtime (hrs)</Label><Input type="number" min={0} step={0.5} value={form.downtime_hours} onChange={e => setForm(f => ({ ...f, downtime_hours: Number(e.target.value) }))} /></div>
+            <div><Label>Cost ($)</Label><NumberInput  min={0} step={0.01} value={form.cost} onValueChange={n => setForm(f => ({ ...f, cost: n }))} /></div>
+            <div><Label>Downtime (hrs)</Label><NumberInput  min={0} step={0.5} value={form.downtime_hours} onValueChange={n => setForm(f => ({ ...f, downtime_hours: n }))} /></div>
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>

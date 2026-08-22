@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { NumberInput } from '@/components/ui/number-input';
 
 interface InvoiceFormProps {
   open: boolean;
@@ -39,7 +40,7 @@ export function InvoiceFormDialog({ open, onOpenChange, onSubmit, initialData, c
         <form onSubmit={handleSubmit} className="space-y-3">
           <div className="grid grid-cols-2 gap-3">
             <div><Label>Invoice # *</Label><Input required value={form.invoice_number} onChange={e => setForm(f => ({ ...f, invoice_number: e.target.value }))} /></div>
-            <div><Label>Amount</Label><Input type="number" min={0} step={0.01} value={form.total_amount} onChange={e => setForm(f => ({ ...f, total_amount: Number(e.target.value) }))} /></div>
+            <div><Label>Amount</Label><NumberInput  min={0} step={0.01} value={form.total_amount} onValueChange={n => setForm(f => ({ ...f, total_amount: n }))} /></div>
           </div>
           <div>
             <Label>Client</Label>

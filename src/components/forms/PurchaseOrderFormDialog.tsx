@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Trash2 } from 'lucide-react';
+import { NumberInput } from '@/components/ui/number-input';
 
 interface POFormProps {
   open: boolean;
@@ -111,8 +112,8 @@ export function PurchaseOrderFormDialog({ open, onOpenChange, onSubmit, initialD
                     </Select>
                   </div>
                   <div className="col-span-3"><Input className="h-9 text-xs" placeholder="Description" value={item.description} onChange={e => updateItem(i, 'description', e.target.value)} /></div>
-                  <div className="col-span-1"><Input className="h-9 text-xs" type="number" min={1} value={item.quantity} onChange={e => updateItem(i, 'quantity', Number(e.target.value))} /></div>
-                  <div className="col-span-2"><Input className="h-9 text-xs" type="number" min={0} step={0.01} value={item.unit_price} onChange={e => updateItem(i, 'unit_price', Number(e.target.value))} /></div>
+                  <div className="col-span-1"><NumberInput className="h-9 text-xs"  min={1} value={item.quantity} onValueChange={n => updateItem(i, 'quantity', n)} /></div>
+                  <div className="col-span-2"><NumberInput className="h-9 text-xs"  min={0} step={0.01} value={item.unit_price} onValueChange={n => updateItem(i, 'unit_price', n)} /></div>
                   <div className="col-span-1 text-xs font-medium text-right py-2">${item.total.toFixed(2)}</div>
                   <div className="col-span-1">
                     {items.length > 1 && <Button type="button" variant="ghost" size="icon" className="h-9 w-9" onClick={() => removeItem(i)}><Trash2 className="w-3 h-3" /></Button>}
