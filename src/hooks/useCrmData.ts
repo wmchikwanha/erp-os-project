@@ -27,10 +27,12 @@ export function useUpsertContact() {
       if (contact.id) {
         const { error } = await supabase.from('contacts').update(payload).eq('id', contact.id);
         if (error) throw error;
-      } else {
-        const { error } = await supabase.from('contacts').insert(payload);
-        if (error) throw error;
+        return contact.id;
       }
+      const { data, error } = await supabase.from('contacts').insert(payload).select('id').single();
+      if (error) throw error;
+      return data.id as string;
+
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['contacts'] }); toast.success('Contact saved'); },
     onError: (e: Error) => toast.error(e.message),

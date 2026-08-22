@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { NumberInput } from '@/components/ui/number-input';
 
 interface Props {
   open: boolean;
@@ -43,7 +44,7 @@ export function TimesheetFormDialog({ open, onOpenChange, onSubmit, loading, emp
             </Select>
           </div>
           <div><Label>Date</Label><Input type="date" value={form.work_date} onChange={e => setForm({ ...form, work_date: e.target.value })} /></div>
-          <div><Label>Hours Worked</Label><Input type="number" step="0.5" value={form.hours_worked} onChange={e => setForm({ ...form, hours_worked: e.target.value })} /></div>
+          <div><Label>Hours Worked</Label><NumberInput  step="0.5" value={form.hours_worked} onValueChange={(n, raw) => setForm({ ...form, hours_worked: raw })} /></div>
           <div>
             <Label>Project (optional)</Label>
             <Select value={form.project_id} onValueChange={v => setForm({ ...form, project_id: v })}>

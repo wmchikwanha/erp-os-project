@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { NumberInput } from '@/components/ui/number-input';
 
 const STATUSES = ['planning', 'active', 'on-hold', 'completed', 'cancelled'];
 const PRIORITIES = ['low', 'medium', 'high', 'critical'];
@@ -89,9 +90,9 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData, l
             <div><Label>End Date</Label><Input type="date" value={form.end_date} onChange={e => setForm(f => ({ ...f, end_date: e.target.value }))} /></div>
           </div>
           <div className="grid grid-cols-3 gap-3">
-            <div><Label>Budget</Label><Input type="number" min={0} step={0.01} value={form.budget} onChange={e => setForm(f => ({ ...f, budget: Number(e.target.value) }))} /></div>
-            <div><Label>Actual Cost</Label><Input type="number" min={0} step={0.01} value={form.actual_cost} onChange={e => setForm(f => ({ ...f, actual_cost: Number(e.target.value) }))} /></div>
-            <div><Label>Progress %</Label><Input type="number" min={0} max={100} value={form.progress} onChange={e => setForm(f => ({ ...f, progress: Number(e.target.value) }))} /></div>
+            <div><Label>Budget</Label><NumberInput  min={0} step={0.01} value={form.budget} onValueChange={n => setForm(f => ({ ...f, budget: n }))} /></div>
+            <div><Label>Actual Cost</Label><NumberInput  min={0} step={0.01} value={form.actual_cost} onValueChange={n => setForm(f => ({ ...f, actual_cost: n }))} /></div>
+            <div><Label>Progress %</Label><NumberInput  min={0} max={100} value={form.progress} onValueChange={n => setForm(f => ({ ...f, progress: n }))} /></div>
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>

@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { DEFAULT_RULES, useShiftCollisionRules, useUpsertShiftCollisionRules } from '@/hooks/useShiftCollisionRules';
+import { NumberInput } from '@/components/ui/number-input';
 
 interface Props { open: boolean; onOpenChange: (v: boolean) => void }
 
@@ -54,23 +55,19 @@ export default function CollisionRulesDialog({ open, onOpenChange }: Props) {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label className="text-xs">Min overlap to count (hours)</Label>
-              <Input type="number" step="0.25" min="0" value={form.min_overlap_hours}
-                onChange={(e) => setForm((f) => ({ ...f, min_overlap_hours: Number(e.target.value) }))} />
+              <NumberInput  step="0.25" min="0" value={form.min_overlap_hours} onValueChange={n => setForm((f) => ({ ...f, min_overlap_hours: n }))} />
             </div>
             <div>
               <Label className="text-xs">Urgent threshold (hours)</Label>
-              <Input type="number" step="0.25" min="0" value={form.severity_threshold_hours}
-                onChange={(e) => setForm((f) => ({ ...f, severity_threshold_hours: Number(e.target.value) }))} />
+              <NumberInput  step="0.25" min="0" value={form.severity_threshold_hours} onValueChange={n => setForm((f) => ({ ...f, severity_threshold_hours: n }))} />
             </div>
             <div>
               <Label className="text-xs">Urgent count (week)</Label>
-              <Input type="number" min="1" value={form.urgent_collision_count}
-                onChange={(e) => setForm((f) => ({ ...f, urgent_collision_count: Number(e.target.value) }))} />
+              <NumberInput  min="1" value={form.urgent_collision_count} onValueChange={n => setForm((f) => ({ ...f, urgent_collision_count: n }))} />
             </div>
             <div>
               <Label className="text-xs">Suggested shift (minutes)</Label>
-              <Input type="number" min="0" step="15" value={form.auto_shift_minutes}
-                onChange={(e) => setForm((f) => ({ ...f, auto_shift_minutes: Number(e.target.value) }))} />
+              <NumberInput  min="0" step="15" value={form.auto_shift_minutes} onValueChange={n => setForm((f) => ({ ...f, auto_shift_minutes: n }))} />
             </div>
           </div>
           <div>

@@ -10,6 +10,7 @@ import { useMaterialBaskets, type BasketItem } from '@/hooks/useMaterialBaskets'
 import { useSupplierQuotes } from '@/hooks/useSupplierQuotes';
 import { usePriceSentinel } from '@/hooks/usePriceSentinel';
 import { toast } from '@/hooks/use-toast';
+import { NumberInput } from '@/components/ui/number-input';
 
 const CCY = ['USD', 'ZWG', 'ZAR', 'RTGS'];
 
@@ -98,7 +99,7 @@ export default function ProcurementScout() {
               <Label className="text-xs">Items in "{activeBasket.name}"</Label>
               <div className="flex flex-wrap gap-2 items-end">
                 <Input className="flex-1 min-w-[160px]" placeholder="Item name (e.g. Rebar 12mm)" value={itemDraft.name} onChange={(e) => setItemDraft({ ...itemDraft, name: e.target.value })} />
-                <Input type="number" className="w-20" placeholder="Qty" value={itemDraft.qty} onChange={(e) => setItemDraft({ ...itemDraft, qty: Number(e.target.value) })} />
+                <NumberInput  className="w-20" placeholder="Qty" value={itemDraft.qty} onValueChange={n => setItemDraft({ ...itemDraft, qty: n })} />
                 <Input className="w-24" placeholder="unit" value={itemDraft.unit} onChange={(e) => setItemDraft({ ...itemDraft, unit: e.target.value })} />
                 <Button size="sm" onClick={onAddItem}><Plus className="w-4 h-4" /></Button>
               </div>
@@ -123,7 +124,7 @@ export default function ProcurementScout() {
           <div className="grid grid-cols-2 md:grid-cols-6 gap-2 items-end">
             <div><Label className="text-xs">Item</Label><Input value={quoteDraft.item} onChange={(e) => setQuoteDraft({ ...quoteDraft, item: e.target.value })} placeholder="Rebar 12mm" /></div>
             <div><Label className="text-xs">Supplier</Label><Input value={quoteDraft.supplier_name} onChange={(e) => setQuoteDraft({ ...quoteDraft, supplier_name: e.target.value })} /></div>
-            <div><Label className="text-xs">Unit price</Label><Input type="number" value={quoteDraft.unit_price} onChange={(e) => setQuoteDraft({ ...quoteDraft, unit_price: Number(e.target.value) })} /></div>
+            <div><Label className="text-xs">Unit price</Label><NumberInput  value={quoteDraft.unit_price} onValueChange={n => setQuoteDraft({ ...quoteDraft, unit_price: n })} /></div>
             <div>
               <Label className="text-xs">Currency</Label>
               <Select value={quoteDraft.currency} onValueChange={(v) => setQuoteDraft({ ...quoteDraft, currency: v })}>
@@ -131,7 +132,7 @@ export default function ProcurementScout() {
                 <SelectContent>{CCY.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
               </Select>
             </div>
-            <div><Label className="text-xs">Lead time (d)</Label><Input type="number" value={quoteDraft.lead_time_days} onChange={(e) => setQuoteDraft({ ...quoteDraft, lead_time_days: Number(e.target.value) })} /></div>
+            <div><Label className="text-xs">Lead time (d)</Label><NumberInput  value={quoteDraft.lead_time_days} onValueChange={n => setQuoteDraft({ ...quoteDraft, lead_time_days: n })} /></div>
             <div><Label className="text-xs">Valid until</Label><Input type="date" value={quoteDraft.valid_until} onChange={(e) => setQuoteDraft({ ...quoteDraft, valid_until: e.target.value })} /></div>
           </div>
           <Button size="sm" onClick={onAddQuote}><Plus className="w-4 h-4 mr-1" />Add quote</Button>

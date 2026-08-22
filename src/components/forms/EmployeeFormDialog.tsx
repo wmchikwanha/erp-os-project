@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RefreshCw, Eye, EyeOff } from 'lucide-react';
 import type { AppRole } from '@/hooks/useRole';
+import { NumberInput } from '@/components/ui/number-input';
 
 const ROLE_OPTIONS: { value: AppRole; label: string }[] = [
   { value: 'employee', label: 'Employee' },
@@ -123,7 +124,7 @@ export function EmployeeFormDialog({ open, onOpenChange, onSubmit, initialData, 
             <div><Label>Start Date</Label><Input type="date" value={form.start_date} onChange={e => setForm(f => ({ ...f, start_date: e.target.value }))} /></div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div><Label>Leave Balance</Label><Input type="number" min={0} value={form.leave_balance} onChange={e => setForm(f => ({ ...f, leave_balance: Number(e.target.value) }))} /></div>
+            <div><Label>Leave Balance</Label><NumberInput  min={0} value={form.leave_balance} onValueChange={n => setForm(f => ({ ...f, leave_balance: n }))} /></div>
             <div>
               <Label>Manager</Label>
               <Select value={form.manager_id} onValueChange={(v) => setForm(f => ({ ...f, manager_id: v === '_none' ? '' : v }))}>

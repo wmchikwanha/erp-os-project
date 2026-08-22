@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { NumberInput } from '@/components/ui/number-input';
 
 interface DealFormProps {
   open: boolean;
@@ -39,7 +40,7 @@ export function DealFormDialog({ open, onOpenChange, onSubmit, initialData, cont
         <form onSubmit={handleSubmit} className="space-y-3">
           <div><Label>Title *</Label><Input required value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} /></div>
           <div className="grid grid-cols-2 gap-3">
-            <div><Label>Value</Label><Input type="number" min={0} value={form.value} onChange={e => setForm(f => ({ ...f, value: Number(e.target.value) }))} /></div>
+            <div><Label>Value</Label><NumberInput  min={0} value={form.value} onValueChange={n => setForm(f => ({ ...f, value: n }))} /></div>
             <div>
               <Label>Currency</Label>
               <Select value={form.currency} onValueChange={v => setForm(f => ({ ...f, currency: v }))}>
@@ -64,7 +65,7 @@ export function DealFormDialog({ open, onOpenChange, onSubmit, initialData, cont
                 </SelectContent>
               </Select>
             </div>
-            <div><Label>Probability %</Label><Input type="number" min={0} max={100} value={form.probability} onChange={e => setForm(f => ({ ...f, probability: Number(e.target.value) }))} /></div>
+            <div><Label>Probability %</Label><NumberInput  min={0} max={100} value={form.probability} onValueChange={n => setForm(f => ({ ...f, probability: n }))} /></div>
           </div>
           <div><Label>Expected Close</Label><Input type="date" value={form.expected_close} onChange={e => setForm(f => ({ ...f, expected_close: e.target.value }))} /></div>
           <div>
