@@ -344,6 +344,21 @@ export type Database = {
           },
         ]
       }
+      demo_config: {
+        Row: {
+          demo_user_id: string
+          id: boolean
+        }
+        Insert: {
+          demo_user_id: string
+          id?: boolean
+        }
+        Update: {
+          demo_user_id?: string
+          id?: boolean
+        }
+        Relationships: []
+      }
       employee_documents: {
         Row: {
           category: string
@@ -1907,6 +1922,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_demo_row: { Args: { _user_id: string }; Returns: boolean }
       is_manager_or_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
