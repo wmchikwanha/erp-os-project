@@ -25,6 +25,9 @@ export function InvoiceFormDialog({ open, onOpenChange, onSubmit, initialData, c
 
 
   useEffect(() => {
+    setNewClient(false);
+    setClient({ name: '', email: '', company: '' });
+
     if (initialData) {
       setForm({ invoice_number: initialData.invoice_number ?? '', contact_id: initialData.contact_id ?? '', total_amount: Number(initialData.total_amount) || 0, due_date: initialData.due_date ?? '', status: initialData.status ?? 'draft' });
     } else {
