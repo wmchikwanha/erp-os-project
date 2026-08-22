@@ -17,6 +17,10 @@ interface InvoiceFormProps {
 
 export function InvoiceFormDialog({ open, onOpenChange, onSubmit, initialData, contacts = [], loading }: InvoiceFormProps) {
   const [form, setForm] = useState({ invoice_number: '', contact_id: '', total_amount: 0, due_date: '', status: 'draft' });
+  const [newClient, setNewClient] = useState(false);
+  const [client, setClient] = useState({ name: '', email: '', company: '' });
+  const upsertContact = useUpsertContact();
+
 
   useEffect(() => {
     if (initialData) {
