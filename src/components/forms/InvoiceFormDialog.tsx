@@ -43,14 +43,44 @@ export function InvoiceFormDialog({ open, onOpenChange, onSubmit, initialData, c
             <div><Label>Amount</Label><NumberInput  min={0} step={0.01} value={form.total_amount} onValueChange={n => setForm(f => ({ ...f, total_amount: n }))} /></div>
           </div>
           <div>
-            <Label>Client</Label>
-            <Select value={form.contact_id} onValueChange={v => setForm(f => ({ ...f, contact_id: v }))}>
-              <SelectTrigger><SelectValue placeholder="Select client" /></SelectTrigger>
-              <SelectContent>
-                {contacts.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
+            <div className="flex items-center justify-between">
+              <Label>Client</Label>
+              <Button type="button" variant="ghost" size="sm" className="h-6 px-2 text-xs" onClick={() => setNewClient(v => !v)}>
+                {newClient ? 'Pick existing' : '+ New client'}
+              </Button>
+            </div>
+            {newClient ? (
+              <div className="space-y-2 rounded-md border border-border p-2">
+                <Input placeholder="Client name *" value={client.name} onChange={e => setClient(c => ({ ...c, name: e.target.value }))} />
+                <div className="grid grid-cols-2 gap-2">
+                  <Input placeholder="Email" type="email" value={client.email} onChange={e => setClient(c => ({ ...c, email: e.target.value }))} />
+                  <Input placeholder="Company" value={client.company} onChange={e => setClient(c => ({ ...c, company: e.target.value }))} />
+                </div>
+                <Button
+                  type="button"
+                  size="sm"
+                  className="w-full"
+                  disabled={!client.name.trim() || upsertContact.isPending}
+                  onClick={() => {
+                    upsertContact.mutate(
+                      { name: client.name.trim(), email: client.email || undefined, company: client.company || undefined, type: 'customer', status: 'active' },
+                      { onSuccess: (id) => { setForm(f => ({ ...f, contact_id: id })); setNewClient(false); setClient({ name: '', email: '', company: '' }); } },
+                    );
+                  }}
+                >
+                  {upsertContact.isPending ? 'Creating...' : 'Create & select'}
+                </Button>
+              </div>
+            ) : (
+              <Select value={form.contact_id} onValueChange={v => setForm(f => ({ ...f, contact_id: v }))}>
+                <SelectTrigger><SelectValue placeholder="Select client" /></SelectTrigger>
+                <SelectContent>
+                  {contacts.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            )}
           </div>
+
           <div className="grid grid-cols-2 gap-3">
             <div><Label>Due Date *</Label><Input type="date" required value={form.due_date} onChange={e => setForm(f => ({ ...f, due_date: e.target.value }))} /></div>
             <div>
