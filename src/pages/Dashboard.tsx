@@ -138,6 +138,13 @@ export default function Dashboard() {
   const recentActivities = activities.slice(0, 5);
   const topDeals = openDeals.sort((a, b) => Number(b.value) - Number(a.value)).slice(0, 4);
 
+  const PanelLink = ({ to, label = 'View' }: { to: string; label?: string }) => (
+    <button type="button" onClick={() => navigate(to)} className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors">
+      {label} <ArrowRight className="w-3 h-3" />
+    </button>
+  );
+
+
   return (
     <div className="space-y-6 animate-slide-in">
       {/* Quick Actions */}
