@@ -1,4 +1,4 @@
-import { TrendingUp, DollarSign, Handshake, FileWarning, Clock, FolderKanban, Users, PackageCheck, Wrench, Package, AlertTriangle, CalendarDays, Plus, Receipt, CreditCard, Briefcase, UserPlus, BarChart3 } from 'lucide-react';
+import { TrendingUp, DollarSign, Handshake, FileWarning, Clock, FolderKanban, Users, PackageCheck, Wrench, Package, AlertTriangle, CalendarDays, Plus, Receipt, CreditCard, Briefcase, UserPlus, BarChart3, ArrowRight } from 'lucide-react';
 import { useDeals, useActivities, useInvoices, useLeaveRequests, useProjects, useEquipmentCheckouts, useMaintenanceLogs, useWorkSchedules, useProducts, useEmployees, useAssets, usePayments, useTimesheets, useExpenses, useJobPositions, useCandidates } from '@/hooks/useCrmData';
 import { cn } from '@/lib/utils';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
@@ -43,21 +43,22 @@ export default function Dashboard() {
   const overdueEquipment = checkouts.filter((c: any) => c.status === 'checked-out' && c.expected_return_date && c.expected_return_date < today);
 
   const kpis = [
-    { label: 'Total Revenue', value: `$${revenue.toLocaleString()}`, icon: DollarSign, color: 'text-success' },
-    { label: 'Net Margin', value: `$${netMargin.toLocaleString()}`, subtext: netMargin >= 0 ? 'Profitable' : 'Loss', icon: TrendingUp, color: netMargin >= 0 ? 'text-success' : 'text-destructive' },
-    { label: 'Open Deals', value: String(openDeals.length), subtext: `$${openDeals.reduce((s, d) => s + Number(d.value), 0).toLocaleString()} pipeline`, icon: Handshake, color: 'text-info' },
-    { label: 'Active Projects', value: String(activeProjects.length), subtext: `${projects.length} total`, icon: FolderKanban, color: 'text-primary' },
-    { label: 'Overdue Invoices', value: String(overdueInvoices.length), subtext: `$${overdueInvoices.reduce((s, i) => s + Number(i.total_amount), 0).toLocaleString()} outstanding`, icon: FileWarning, color: 'text-destructive' },
+    { label: 'Total Revenue', value: `$${revenue.toLocaleString()}`, icon: DollarSign, color: 'text-success', path: '/invoices' },
+    { label: 'Net Margin', value: `$${netMargin.toLocaleString()}`, subtext: netMargin >= 0 ? 'Profitable' : 'Loss', icon: TrendingUp, color: netMargin >= 0 ? 'text-success' : 'text-destructive', path: '/reports' },
+    { label: 'Open Deals', value: String(openDeals.length), subtext: `$${openDeals.reduce((s, d) => s + Number(d.value), 0).toLocaleString()} pipeline`, icon: Handshake, color: 'text-info', path: '/deals' },
+    { label: 'Active Projects', value: String(activeProjects.length), subtext: `${projects.length} total`, icon: FolderKanban, color: 'text-primary', path: '/projects' },
+    { label: 'Overdue Invoices', value: String(overdueInvoices.length), subtext: `$${overdueInvoices.reduce((s, i) => s + Number(i.total_amount), 0).toLocaleString()} outstanding`, icon: FileWarning, color: 'text-destructive', path: '/invoices' },
   ];
 
   const opsKpis = [
-    { label: 'Workers On Site', value: String(workersToday), icon: CalendarDays, color: 'text-primary' },
-    { label: 'Equipment Out', value: String(checkedOutCount), subtext: `${assets.length} total assets`, icon: PackageCheck, color: 'text-info' },
-    { label: 'Pending Leave', value: String(pendingLeave), icon: Clock, color: 'text-warning' },
-    { label: 'Low Stock Items', value: String(lowStockItems.length), icon: Package, color: lowStockItems.length > 0 ? 'text-destructive' : 'text-success' },
-    { label: 'Overdue Maintenance', value: String(overdueMaintenance), icon: Wrench, color: overdueMaintenance > 0 ? 'text-destructive' : 'text-success' },
-    { label: 'Employees', value: String(employees.length), icon: Users, color: 'text-primary' },
+    { label: 'Workers On Site', value: String(workersToday), icon: CalendarDays, color: 'text-primary', path: '/scheduling' },
+    { label: 'Equipment Out', value: String(checkedOutCount), subtext: `${assets.length} total assets`, icon: PackageCheck, color: 'text-info', path: '/equipment' },
+    { label: 'Pending Leave', value: String(pendingLeave), icon: Clock, color: 'text-warning', path: '/hr' },
+    { label: 'Low Stock Items', value: String(lowStockItems.length), icon: Package, color: lowStockItems.length > 0 ? 'text-destructive' : 'text-success', path: '/procurement' },
+    { label: 'Overdue Maintenance', value: String(overdueMaintenance), icon: Wrench, color: overdueMaintenance > 0 ? 'text-destructive' : 'text-success', path: '/maintenance' },
+    { label: 'Employees', value: String(employees.length), icon: Users, color: 'text-primary', path: '/hr' },
   ];
+
 
   // Quick actions
   const quickActions = [
@@ -137,6 +138,13 @@ export default function Dashboard() {
   const recentActivities = activities.slice(0, 5);
   const topDeals = openDeals.sort((a, b) => Number(b.value) - Number(a.value)).slice(0, 4);
 
+  const PanelLink = ({ to, label = 'View' }: { to: string; label?: string }) => (
+    <button type="button" onClick={() => navigate(to)} className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors">
+      {label} <ArrowRight className="w-3 h-3" />
+    </button>
+  );
+
+
   return (
     <div className="space-y-6 animate-slide-in">
       {/* Quick Actions */}
@@ -155,36 +163,40 @@ export default function Dashboard() {
       {/* Primary KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {kpis.map((kpi) => (
-          <div key={kpi.label} className="kpi-card">
+          <button key={kpi.label} type="button" onClick={() => navigate(kpi.path)} className="kpi-card text-left group hover:border-primary/40 hover:shadow-elevated transition-all">
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{kpi.label}</span>
               <kpi.icon className={cn('w-4 h-4', kpi.color)} />
             </div>
             <div className="text-2xl font-bold">{kpi.value}</div>
             {kpi.subtext && <p className="text-xs text-muted-foreground mt-1">{kpi.subtext}</p>}
-          </div>
+            <span className="mt-2 inline-flex items-center gap-1 text-[10px] uppercase tracking-wider text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
+              Open <ArrowRight className="w-3 h-3" />
+            </span>
+          </button>
         ))}
       </div>
 
       {/* Operations KPIs */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {opsKpis.map((kpi) => (
-          <div key={kpi.label} className="bg-card border border-border rounded-lg p-3">
+          <button key={kpi.label} type="button" onClick={() => navigate(kpi.path)} className="bg-card border border-border rounded-lg p-3 text-left hover:border-primary/40 hover:shadow-subtle transition-all">
             <div className="flex items-center gap-2 mb-1">
               <kpi.icon className={cn('w-3.5 h-3.5', kpi.color)} />
               <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground truncate">{kpi.label}</span>
             </div>
             <p className="text-lg font-bold">{kpi.value}</p>
             {kpi.subtext && <p className="text-[10px] text-muted-foreground">{kpi.subtext}</p>}
-          </div>
+          </button>
         ))}
       </div>
+
 
       {/* AR Aging + Recruitment + Workforce Row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* AR Aging */}
         <div className="bg-card border border-border rounded-lg p-4">
-          <h3 className="text-sm font-semibold mb-3">Receivables Aging</h3>
+          <div className="flex items-center justify-between mb-3"><h3 className="text-sm font-semibold">Receivables Aging</h3><PanelLink to="/invoices" label="Invoices" /></div>
           <div className="space-y-2">
             {[
               { label: 'Current', value: agingBuckets.current, color: 'bg-success' },
@@ -205,7 +217,7 @@ export default function Dashboard() {
 
         {/* Recruitment Snapshot */}
         <div className="bg-card border border-border rounded-lg p-4">
-          <h3 className="text-sm font-semibold mb-3">Recruitment Pipeline</h3>
+          <div className="flex items-center justify-between mb-3"><h3 className="text-sm font-semibold">Recruitment Pipeline</h3><PanelLink to="/hr" label="HR" /></div>
           <div className="grid grid-cols-3 gap-2 text-center">
             <div>
               <p className="text-2xl font-bold text-primary">{openPositions}</p>
@@ -225,7 +237,7 @@ export default function Dashboard() {
 
         {/* Workforce Utilization */}
         <div className="bg-card border border-border rounded-lg p-4">
-          <h3 className="text-sm font-semibold mb-3">Today's Workforce</h3>
+          <div className="flex items-center justify-between mb-3"><h3 className="text-sm font-semibold">Today's Workforce</h3><PanelLink to="/scheduling" label="Scheduling" /></div>
           <div className="grid grid-cols-2 gap-3 text-center">
             <div>
               <p className="text-2xl font-bold">{scheduledHours.toFixed(1)}h</p>
@@ -252,7 +264,7 @@ export default function Dashboard() {
 
       {/* Cash Flow Forecast */}
       <div className="bg-card border border-border rounded-lg p-5">
-        <h3 className="text-sm font-semibold mb-4">Cash Flow Forecast (Next 90 Days)</h3>
+        <div className="flex items-center justify-between mb-4"><h3 className="text-sm font-semibold">Cash Flow Forecast (Next 90 Days)</h3><PanelLink to="/sae/liquidity" label="Liquidity Guardian" /></div>
         <ResponsiveContainer width="100%" height={180}>
           <BarChart data={cashFlow}>
             <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
@@ -268,7 +280,7 @@ export default function Dashboard() {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-card border border-border rounded-lg p-5">
-          <h3 className="text-sm font-semibold mb-4">Revenue Trend (Monthly)</h3>
+          <div className="flex items-center justify-between mb-4"><h3 className="text-sm font-semibold">Revenue Trend (Monthly)</h3><PanelLink to="/reports" label="Reports" /></div>
           {revenueTrend.length > 0 ? (
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={revenueTrend}>
@@ -283,7 +295,7 @@ export default function Dashboard() {
         </div>
 
         <div className="bg-card border border-border rounded-lg p-5">
-          <h3 className="text-sm font-semibold mb-4">Project Budget vs Actual</h3>
+          <div className="flex items-center justify-between mb-4"><h3 className="text-sm font-semibold">Project Budget vs Actual</h3><PanelLink to="/projects" label="Projects" /></div>
           {projectBudgetData.length > 0 ? (
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={projectBudgetData} layout="vertical">
@@ -302,7 +314,7 @@ export default function Dashboard() {
       {/* Activity + Deals Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-card border border-border rounded-lg">
-          <div className="px-5 py-4 border-b border-border"><h3 className="text-sm font-semibold">Recent Activities</h3></div>
+          <div className="px-5 py-4 border-b border-border flex items-center justify-between"><h3 className="text-sm font-semibold">Recent Activities</h3><PanelLink to="/activities" /></div>
           <div className="divide-y divide-border">
             {recentActivities.map((activity) => (
               <div key={activity.id} className="px-5 py-3 flex items-start gap-3">
@@ -322,7 +334,7 @@ export default function Dashboard() {
         </div>
 
         <div className="bg-card border border-border rounded-lg">
-          <div className="px-5 py-4 border-b border-border"><h3 className="text-sm font-semibold">Top Active Deals</h3></div>
+          <div className="px-5 py-4 border-b border-border flex items-center justify-between"><h3 className="text-sm font-semibold">Top Active Deals</h3><PanelLink to="/deals" /></div>
           <div className="divide-y divide-border">
             {topDeals.map((deal) => (
               <div key={deal.id} className="px-5 py-3">
@@ -353,13 +365,14 @@ export default function Dashboard() {
             <div className="px-5 py-3 border-b border-warning/20 flex items-center gap-2">
               <Package className="w-4 h-4 text-warning" />
               <h3 className="text-sm font-semibold">Low Stock Alerts</h3>
+              <div className="ml-auto"><PanelLink to="/procurement" label="Stock" /></div>
             </div>
             <div className="divide-y divide-warning/10">
               {lowStockItems.slice(0, 5).map((p: any) => (
-                <div key={p.id} className="px-5 py-2.5 flex items-center justify-between">
+                <button key={p.id} type="button" onClick={() => navigate('/procurement')} className="w-full text-left px-5 py-2.5 flex items-center justify-between hover:bg-warning/10">
                   <span className="text-sm">{p.name}</span>
                   <span className="text-sm font-semibold text-destructive">{p.stock_quantity} left (reorder: {p.reorder_level})</span>
-                </div>
+                </button>
               ))}
             </div>
           </div>
@@ -370,13 +383,14 @@ export default function Dashboard() {
             <div className="px-5 py-3 border-b border-destructive/20 flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-destructive" />
               <h3 className="text-sm font-semibold">Overdue Equipment Returns</h3>
+              <div className="ml-auto"><PanelLink to="/equipment" label="Assets" /></div>
             </div>
             <div className="divide-y divide-destructive/10">
               {overdueEquipment.slice(0, 5).map((c: any) => (
-                <div key={c.id} className="px-5 py-2.5 flex items-center justify-between">
+                <button key={c.id} type="button" onClick={() => navigate('/equipment')} className="w-full text-left px-5 py-2.5 flex items-center justify-between hover:bg-destructive/10">
                   <span className="text-sm">Asset #{c.asset_id?.slice(0, 8)}</span>
                   <span className="text-xs text-destructive">Due: {c.expected_return_date}</span>
-                </div>
+                </button>
               ))}
             </div>
           </div>
@@ -384,13 +398,14 @@ export default function Dashboard() {
       </div>
 
       {overdueInvoices.length > 0 && (
-        <div className="bg-destructive/5 border border-destructive/20 rounded-lg p-4 flex items-center gap-3">
+        <button type="button" onClick={() => navigate('/invoices')} className="w-full text-left bg-destructive/5 border border-destructive/20 rounded-lg p-4 flex items-center gap-3 hover:bg-destructive/10 transition-colors">
           <FileWarning className="w-5 h-5 text-destructive shrink-0" />
           <div>
             <p className="text-sm font-medium">Overdue invoices require attention</p>
             <p className="text-xs text-muted-foreground">{overdueInvoices.length} invoice(s) past due date totalling ${overdueInvoices.reduce((s, i) => s + Number(i.total_amount), 0).toLocaleString()}</p>
           </div>
-        </div>
+          <ArrowRight className="w-4 h-4 text-destructive ml-auto shrink-0" />
+        </button>
       )}
     </div>
   );
