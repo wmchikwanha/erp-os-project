@@ -156,30 +156,34 @@ export default function Dashboard() {
       {/* Primary KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {kpis.map((kpi) => (
-          <div key={kpi.label} className="kpi-card">
+          <button key={kpi.label} type="button" onClick={() => navigate(kpi.path)} className="kpi-card text-left group hover:border-primary/40 hover:shadow-elevated transition-all">
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{kpi.label}</span>
               <kpi.icon className={cn('w-4 h-4', kpi.color)} />
             </div>
             <div className="text-2xl font-bold">{kpi.value}</div>
             {kpi.subtext && <p className="text-xs text-muted-foreground mt-1">{kpi.subtext}</p>}
-          </div>
+            <span className="mt-2 inline-flex items-center gap-1 text-[10px] uppercase tracking-wider text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
+              Open <ArrowRight className="w-3 h-3" />
+            </span>
+          </button>
         ))}
       </div>
 
       {/* Operations KPIs */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {opsKpis.map((kpi) => (
-          <div key={kpi.label} className="bg-card border border-border rounded-lg p-3">
+          <button key={kpi.label} type="button" onClick={() => navigate(kpi.path)} className="bg-card border border-border rounded-lg p-3 text-left hover:border-primary/40 hover:shadow-subtle transition-all">
             <div className="flex items-center gap-2 mb-1">
               <kpi.icon className={cn('w-3.5 h-3.5', kpi.color)} />
               <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground truncate">{kpi.label}</span>
             </div>
             <p className="text-lg font-bold">{kpi.value}</p>
             {kpi.subtext && <p className="text-[10px] text-muted-foreground">{kpi.subtext}</p>}
-          </div>
+          </button>
         ))}
       </div>
+
 
       {/* AR Aging + Recruitment + Workforce Row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
