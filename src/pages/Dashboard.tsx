@@ -196,7 +196,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* AR Aging */}
         <div className="bg-card border border-border rounded-lg p-4">
-          <h3 className="text-sm font-semibold mb-3">Receivables Aging</h3>
+          <div className="flex items-center justify-between mb-3"><h3 className="text-sm font-semibold">Receivables Aging</h3><PanelLink to="/invoices" label="Invoices" /></div>
           <div className="space-y-2">
             {[
               { label: 'Current', value: agingBuckets.current, color: 'bg-success' },
@@ -217,7 +217,7 @@ export default function Dashboard() {
 
         {/* Recruitment Snapshot */}
         <div className="bg-card border border-border rounded-lg p-4">
-          <h3 className="text-sm font-semibold mb-3">Recruitment Pipeline</h3>
+          <div className="flex items-center justify-between mb-3"><h3 className="text-sm font-semibold">Recruitment Pipeline</h3><PanelLink to="/hr" label="HR" /></div>
           <div className="grid grid-cols-3 gap-2 text-center">
             <div>
               <p className="text-2xl font-bold text-primary">{openPositions}</p>
@@ -237,7 +237,7 @@ export default function Dashboard() {
 
         {/* Workforce Utilization */}
         <div className="bg-card border border-border rounded-lg p-4">
-          <h3 className="text-sm font-semibold mb-3">Today's Workforce</h3>
+          <div className="flex items-center justify-between mb-3"><h3 className="text-sm font-semibold">Today's Workforce</h3><PanelLink to="/scheduling" label="Scheduling" /></div>
           <div className="grid grid-cols-2 gap-3 text-center">
             <div>
               <p className="text-2xl font-bold">{scheduledHours.toFixed(1)}h</p>
@@ -264,7 +264,7 @@ export default function Dashboard() {
 
       {/* Cash Flow Forecast */}
       <div className="bg-card border border-border rounded-lg p-5">
-        <h3 className="text-sm font-semibold mb-4">Cash Flow Forecast (Next 90 Days)</h3>
+        <div className="flex items-center justify-between mb-4"><h3 className="text-sm font-semibold">Cash Flow Forecast (Next 90 Days)</h3><PanelLink to="/sae/liquidity" label="Liquidity Guardian" /></div>
         <ResponsiveContainer width="100%" height={180}>
           <BarChart data={cashFlow}>
             <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
@@ -280,7 +280,7 @@ export default function Dashboard() {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-card border border-border rounded-lg p-5">
-          <h3 className="text-sm font-semibold mb-4">Revenue Trend (Monthly)</h3>
+          <div className="flex items-center justify-between mb-4"><h3 className="text-sm font-semibold">Revenue Trend (Monthly)</h3><PanelLink to="/reports" label="Reports" /></div>
           {revenueTrend.length > 0 ? (
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={revenueTrend}>
@@ -295,7 +295,7 @@ export default function Dashboard() {
         </div>
 
         <div className="bg-card border border-border rounded-lg p-5">
-          <h3 className="text-sm font-semibold mb-4">Project Budget vs Actual</h3>
+          <div className="flex items-center justify-between mb-4"><h3 className="text-sm font-semibold">Project Budget vs Actual</h3><PanelLink to="/projects" label="Projects" /></div>
           {projectBudgetData.length > 0 ? (
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={projectBudgetData} layout="vertical">
@@ -314,7 +314,7 @@ export default function Dashboard() {
       {/* Activity + Deals Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-card border border-border rounded-lg">
-          <div className="px-5 py-4 border-b border-border"><h3 className="text-sm font-semibold">Recent Activities</h3></div>
+          <div className="px-5 py-4 border-b border-border flex items-center justify-between"><h3 className="text-sm font-semibold">Recent Activities</h3><PanelLink to="/activities" /></div>
           <div className="divide-y divide-border">
             {recentActivities.map((activity) => (
               <div key={activity.id} className="px-5 py-3 flex items-start gap-3">
@@ -334,7 +334,7 @@ export default function Dashboard() {
         </div>
 
         <div className="bg-card border border-border rounded-lg">
-          <div className="px-5 py-4 border-b border-border"><h3 className="text-sm font-semibold">Top Active Deals</h3></div>
+          <div className="px-5 py-4 border-b border-border flex items-center justify-between"><h3 className="text-sm font-semibold">Top Active Deals</h3><PanelLink to="/deals" /></div>
           <div className="divide-y divide-border">
             {topDeals.map((deal) => (
               <div key={deal.id} className="px-5 py-3">
@@ -365,13 +365,14 @@ export default function Dashboard() {
             <div className="px-5 py-3 border-b border-warning/20 flex items-center gap-2">
               <Package className="w-4 h-4 text-warning" />
               <h3 className="text-sm font-semibold">Low Stock Alerts</h3>
+              <div className="ml-auto"><PanelLink to="/procurement" label="Stock" /></div>
             </div>
             <div className="divide-y divide-warning/10">
               {lowStockItems.slice(0, 5).map((p: any) => (
-                <div key={p.id} className="px-5 py-2.5 flex items-center justify-between">
+                <button key={p.id} type="button" onClick={() => navigate('/procurement')} className="w-full text-left px-5 py-2.5 flex items-center justify-between hover:bg-warning/10">
                   <span className="text-sm">{p.name}</span>
                   <span className="text-sm font-semibold text-destructive">{p.stock_quantity} left (reorder: {p.reorder_level})</span>
-                </div>
+                </button>
               ))}
             </div>
           </div>
@@ -382,13 +383,14 @@ export default function Dashboard() {
             <div className="px-5 py-3 border-b border-destructive/20 flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-destructive" />
               <h3 className="text-sm font-semibold">Overdue Equipment Returns</h3>
+              <div className="ml-auto"><PanelLink to="/equipment" label="Assets" /></div>
             </div>
             <div className="divide-y divide-destructive/10">
               {overdueEquipment.slice(0, 5).map((c: any) => (
-                <div key={c.id} className="px-5 py-2.5 flex items-center justify-between">
+                <button key={c.id} type="button" onClick={() => navigate('/equipment')} className="w-full text-left px-5 py-2.5 flex items-center justify-between hover:bg-destructive/10">
                   <span className="text-sm">Asset #{c.asset_id?.slice(0, 8)}</span>
                   <span className="text-xs text-destructive">Due: {c.expected_return_date}</span>
-                </div>
+                </button>
               ))}
             </div>
           </div>
@@ -396,13 +398,14 @@ export default function Dashboard() {
       </div>
 
       {overdueInvoices.length > 0 && (
-        <div className="bg-destructive/5 border border-destructive/20 rounded-lg p-4 flex items-center gap-3">
+        <button type="button" onClick={() => navigate('/invoices')} className="w-full text-left bg-destructive/5 border border-destructive/20 rounded-lg p-4 flex items-center gap-3 hover:bg-destructive/10 transition-colors">
           <FileWarning className="w-5 h-5 text-destructive shrink-0" />
           <div>
             <p className="text-sm font-medium">Overdue invoices require attention</p>
             <p className="text-xs text-muted-foreground">{overdueInvoices.length} invoice(s) past due date totalling ${overdueInvoices.reduce((s, i) => s + Number(i.total_amount), 0).toLocaleString()}</p>
           </div>
-        </div>
+          <ArrowRight className="w-4 h-4 text-destructive ml-auto shrink-0" />
+        </button>
       )}
     </div>
   );
