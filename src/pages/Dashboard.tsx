@@ -1,4 +1,4 @@
-import { TrendingUp, DollarSign, Handshake, FileWarning, Clock, FolderKanban, Users, PackageCheck, Wrench, Package, AlertTriangle, CalendarDays, Plus, Receipt, CreditCard, Briefcase, UserPlus, BarChart3 } from 'lucide-react';
+import { TrendingUp, DollarSign, Handshake, FileWarning, Clock, FolderKanban, Users, PackageCheck, Wrench, Package, AlertTriangle, CalendarDays, Plus, Receipt, CreditCard, Briefcase, UserPlus, BarChart3, ArrowRight } from 'lucide-react';
 import { useDeals, useActivities, useInvoices, useLeaveRequests, useProjects, useEquipmentCheckouts, useMaintenanceLogs, useWorkSchedules, useProducts, useEmployees, useAssets, usePayments, useTimesheets, useExpenses, useJobPositions, useCandidates } from '@/hooks/useCrmData';
 import { cn } from '@/lib/utils';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
