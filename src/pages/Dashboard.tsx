@@ -43,21 +43,22 @@ export default function Dashboard() {
   const overdueEquipment = checkouts.filter((c: any) => c.status === 'checked-out' && c.expected_return_date && c.expected_return_date < today);
 
   const kpis = [
-    { label: 'Total Revenue', value: `$${revenue.toLocaleString()}`, icon: DollarSign, color: 'text-success' },
-    { label: 'Net Margin', value: `$${netMargin.toLocaleString()}`, subtext: netMargin >= 0 ? 'Profitable' : 'Loss', icon: TrendingUp, color: netMargin >= 0 ? 'text-success' : 'text-destructive' },
-    { label: 'Open Deals', value: String(openDeals.length), subtext: `$${openDeals.reduce((s, d) => s + Number(d.value), 0).toLocaleString()} pipeline`, icon: Handshake, color: 'text-info' },
-    { label: 'Active Projects', value: String(activeProjects.length), subtext: `${projects.length} total`, icon: FolderKanban, color: 'text-primary' },
-    { label: 'Overdue Invoices', value: String(overdueInvoices.length), subtext: `$${overdueInvoices.reduce((s, i) => s + Number(i.total_amount), 0).toLocaleString()} outstanding`, icon: FileWarning, color: 'text-destructive' },
+    { label: 'Total Revenue', value: `$${revenue.toLocaleString()}`, icon: DollarSign, color: 'text-success', path: '/invoices' },
+    { label: 'Net Margin', value: `$${netMargin.toLocaleString()}`, subtext: netMargin >= 0 ? 'Profitable' : 'Loss', icon: TrendingUp, color: netMargin >= 0 ? 'text-success' : 'text-destructive', path: '/reports' },
+    { label: 'Open Deals', value: String(openDeals.length), subtext: `$${openDeals.reduce((s, d) => s + Number(d.value), 0).toLocaleString()} pipeline`, icon: Handshake, color: 'text-info', path: '/deals' },
+    { label: 'Active Projects', value: String(activeProjects.length), subtext: `${projects.length} total`, icon: FolderKanban, color: 'text-primary', path: '/projects' },
+    { label: 'Overdue Invoices', value: String(overdueInvoices.length), subtext: `$${overdueInvoices.reduce((s, i) => s + Number(i.total_amount), 0).toLocaleString()} outstanding`, icon: FileWarning, color: 'text-destructive', path: '/invoices' },
   ];
 
   const opsKpis = [
-    { label: 'Workers On Site', value: String(workersToday), icon: CalendarDays, color: 'text-primary' },
-    { label: 'Equipment Out', value: String(checkedOutCount), subtext: `${assets.length} total assets`, icon: PackageCheck, color: 'text-info' },
-    { label: 'Pending Leave', value: String(pendingLeave), icon: Clock, color: 'text-warning' },
-    { label: 'Low Stock Items', value: String(lowStockItems.length), icon: Package, color: lowStockItems.length > 0 ? 'text-destructive' : 'text-success' },
-    { label: 'Overdue Maintenance', value: String(overdueMaintenance), icon: Wrench, color: overdueMaintenance > 0 ? 'text-destructive' : 'text-success' },
-    { label: 'Employees', value: String(employees.length), icon: Users, color: 'text-primary' },
+    { label: 'Workers On Site', value: String(workersToday), icon: CalendarDays, color: 'text-primary', path: '/scheduling' },
+    { label: 'Equipment Out', value: String(checkedOutCount), subtext: `${assets.length} total assets`, icon: PackageCheck, color: 'text-info', path: '/equipment' },
+    { label: 'Pending Leave', value: String(pendingLeave), icon: Clock, color: 'text-warning', path: '/hr' },
+    { label: 'Low Stock Items', value: String(lowStockItems.length), icon: Package, color: lowStockItems.length > 0 ? 'text-destructive' : 'text-success', path: '/procurement' },
+    { label: 'Overdue Maintenance', value: String(overdueMaintenance), icon: Wrench, color: overdueMaintenance > 0 ? 'text-destructive' : 'text-success', path: '/maintenance' },
+    { label: 'Employees', value: String(employees.length), icon: Users, color: 'text-primary', path: '/hr' },
   ];
+
 
   // Quick actions
   const quickActions = [
