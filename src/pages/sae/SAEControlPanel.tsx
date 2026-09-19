@@ -50,12 +50,91 @@ export default function SAEControlPanel() {
     reload();
   };
 
+  const addOutage = async () => {
+    if (!newOutage.zone || !newOutage.start_time || !newOutage.end_time) return;
+    if (new Date(newOutage.end_time) <= new Date(newOutage.start_time)) {
+      return toast({ title: 'End time must be after start time', variant: 'destructive' });
+    }
+    const { error } = await supabase.from('load_shedding_schedule').insert({
+      zone: newOutage.zone,
+      start_time: localToIso(newOutage.start_time),
+      end_time: localToIso(newOutage.end_time),
+      source: newOutage.source || 'manual',
+    });
+    if (error) return toast({ title: 'Could not save', description: error.message, variant: 'destructive' });
+    setNewOutage({ ...newOutage, start_time: '', end_time: '' });
+    toast({ title: 'Outage window added' });
+    reload();
+  };
+
+  const addTypicalWeek = async () => {
+    const rows: { zone: string; start_time: string; end_time: string; source: string }[] = [];
+    const base = new Date();
+    base.setHours(0, 0, 0, 0);
+    for (let d = 0; d < 7; d++) {
+      const day = new Date(base.getTime() + d * 86400000);
+      const morning = new Date(day); morning.setHours(5, 0, 0, 0);
+      const mEnd = new Date(day); mEnd.setHours(9, 0, 0, 0);
+      const evening = new Date(day); evening.setHours(17, 0, 0, 0);
+      const eEnd = new Date(day); eEnd.setHours(21, 0, 0, 0);
+      rows.push({ zone: newOutage.zone, start_time: morning.toISOString(), end_time: mEnd.toISOString(), source: 'ZESA (typical week)' });
+      rows.push({ zone: newOutage.zone, start_time: evening.toISOString(), end_time: eEnd.toISOString(), source: 'ZESA (typical week)' });
+    }
+    const { error } = await supabase.from('load_shedding_schedule').insert(rows);
+    if (error) return toast({ title: 'Could not save', description: error.message, variant: 'destructive' });
+    toast({ title: 'Typical 7-day schedule added', description: `${rows.length} windows for ${newOutage.zone}` });
+    reload();
+  };
+
   return (
     <div className="space-y-6 max-w-5xl">
       <header className="space-y-1">
         <h1 className="text-2xl font-bold">SAE Control Panel</h1>
-        <p className="text-sm text-muted-foreground">Feed the Situational Awareness Engine with the data only you can know: parallel-market rates and statutory obligations.</p>
+        <p className="text-sm text-muted-foreground">Feed the Situational Awareness Engine with the data only you can know: ZESA outage windows, parallel-market rates and statutory obligations.</p>
       </header>
+
+      <Card>
+        <CardHeader><CardTitle className="text-sm">ZESA Load-Shedding Schedule</CardTitle></CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-[11px] text-muted-foreground">
+            Add each outage window. The Load-Shedding Planner matches these against shifts and power-sensitive equipment.
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+            <Input value={newOutage.zone} onChange={(e) => setNewOutage({ ...newOutage, zone: e.target.value })} placeholder="Zone / suburb" />
+            <Input type="datetime-local" value={newOutage.start_time} onChange={(e) => setNewOutage({ ...newOutage, start_time: e.target.value })} />
+            <Input type="datetime-local" value={newOutage.end_time} onChange={(e) => setNewOutage({ ...newOutage, end_time: e.target.value })} />
+            <Input value={newOutage.source} onChange={(e) => setNewOutage({ ...newOutage, source: e.target.value })} placeholder="Source" />
+            <div className="flex gap-2">
+              <Button onClick={addOutage} size="sm">Add window</Button>
+              <Button onClick={addTypicalWeek} size="sm" variant="outline">Typical week</Button>
+            </div>
+          </div>
+          {outages.length === 0 ? (
+            <p className="text-xs text-muted-foreground">No upcoming outage windows logged yet.</p>
+          ) : (
+            <table className="w-full text-xs">
+              <thead className="text-muted-foreground"><tr><th className="text-left py-1">Zone</th><th>Start</th><th>End</th><th>Hours</th><th>Source</th><th /></tr></thead>
+              <tbody>
+                {outages.map((o) => (
+                  <tr key={o.id} className="border-t border-border">
+                    <td className="py-1.5 font-medium">{o.zone}</td>
+                    <td className="text-center">{fmt(o.start_time)}</td>
+                    <td className="text-center">{fmt(o.end_time)}</td>
+                    <td className="text-center">{((new Date(o.end_time).getTime() - new Date(o.start_time).getTime()) / 3600000).toFixed(1)}h</td>
+                    <td className="text-center text-muted-foreground">{o.source}</td>
+                    <td className="text-right">
+                      <button onClick={async () => { await supabase.from('load_shedding_schedule').delete().eq('id', o.id); reload(); }} className="text-muted-foreground hover:text-destructive">
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </CardContent>
+      </Card>
+
 
       <Card>
         <CardHeader><CardTitle className="text-sm">Currency Rates</CardTitle></CardHeader>
