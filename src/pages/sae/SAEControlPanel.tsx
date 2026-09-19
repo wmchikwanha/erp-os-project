@@ -10,21 +10,29 @@ import { NumberInput } from '@/components/ui/number-input';
 
 interface Rate { id: string; currency: string; official_rate: number; parallel_rate: number; effective_date: string; source: string | null }
 interface Tax { id: string; name: string; authority: string; amount: number; currency: string; due_date: string; status: string }
+interface Outage { id: string; zone: string; start_time: string; end_time: string; source: string | null }
+
+const localToIso = (v: string) => new Date(v).toISOString();
+const fmt = (iso: string) => new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
 
 export default function SAEControlPanel() {
   const { user } = useAuth();
   const [rates, setRates] = useState<Rate[]>([]);
   const [taxes, setTaxes] = useState<Tax[]>([]);
+  const [outages, setOutages] = useState<Outage[]>([]);
   const [newRate, setNewRate] = useState({ currency: 'USD', official_rate: 1, parallel_rate: 1, source: 'manual' });
   const [newTax, setNewTax] = useState({ name: '', authority: 'ZIMRA', amount: 0, currency: 'USD', due_date: '' });
+  const [newOutage, setNewOutage] = useState({ zone: 'Zone A', start_time: '', end_time: '', source: 'ZESA' });
 
   const reload = async () => {
-    const [{ data: r }, { data: t }] = await Promise.all([
+    const [{ data: r }, { data: t }, { data: o }] = await Promise.all([
       supabase.from('currency_rates').select('*').order('effective_date', { ascending: false }),
       supabase.from('tax_obligations').select('*').eq('user_id', user!.id).order('due_date'),
+      supabase.from('load_shedding_schedule').select('*').gte('end_time', new Date().toISOString()).order('start_time'),
     ]);
     setRates((r as Rate[]) || []);
     setTaxes((t as Tax[]) || []);
+    setOutages((o as Outage[]) || []);
   };
   useEffect(() => { if (user) reload(); }, [user]);
 
