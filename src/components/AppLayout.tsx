@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Users, Handshake, CalendarCheck, Package,
   FileText, UserCog, BarChart3, Settings, ChevronLeft, Menu, Repeat, Home, FolderKanban,
   Building2, CalendarDays, PackageCheck, Wrench, TrendingDown, CreditCard, Timer, Receipt,
-  Activity, Sparkles, ShoppingCart, Shield, Zap, ScrollText, ShieldCheck,
+  Activity, Sparkles, ShoppingCart, Shield, Zap, ScrollText, ShieldCheck, Inbox,
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -12,6 +12,7 @@ import { useDemoRole } from '@/hooks/useDemoRole';
 import AskAIPanel from '@/components/AskAIPanel';
 import NotificationsPanel from '@/components/NotificationsPanel';
 import HelpDialog from '@/components/HelpDialog';
+import FeedbackDialog from '@/components/FeedbackDialog';
 import OfflineIndicator from '@/components/OfflineIndicator';
 import type { AppRole } from '@/hooks/useRole';
 
@@ -41,6 +42,7 @@ const ALL_NAV_ITEMS = [
   { to: '/sae/control', icon: Sparkles, label: 'SAE Control', roles: ['admin', 'finance_manager'] },
   { to: '/sae/audit', icon: ScrollText, label: 'SAE Audit Log', roles: ['admin', 'procurement_manager', 'hr_manager', 'project_manager', 'finance_manager'] },
   { to: '/settings/approvals', icon: ShieldCheck, label: 'Approval Settings', roles: ['admin'] },
+  { to: '/settings/feedback', icon: Inbox, label: 'Feedback Inbox', roles: ['admin'] },
 ];
 
 function getNavItems(role: string) {
@@ -130,6 +132,7 @@ export default function AppLayout({ children, role = 'admin' }: { children: Reac
           <div className="flex items-center gap-2">
             <OfflineIndicator />
             <HelpDialog />
+            <FeedbackDialog />
             <NotificationsPanel />
             <NavLink to="/settings" className="p-1.5 rounded-md hover:bg-muted text-muted-foreground"><Settings className="w-4 h-4" /></NavLink>
             <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
