@@ -50,7 +50,7 @@ export default function FeedbackDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button className="p-1.5 rounded-md hover:bg-muted text-muted-foreground" title="Send feedback">
+        <button className="p-1.5 rounded-md hover:bg-muted text-muted-foreground" title="Message the developer">
           <MessageSquarePlus className="w-4 h-4" />
         </button>
       </DialogTrigger>
@@ -94,7 +94,7 @@ export default function FeedbackDialog() {
 
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-          <Button onClick={submit} disabled={saving}>{saving ? 'Sending…' : 'Send'}</Button>
+          <Button onClick={submit} disabled={saving}>{saving ? 'Sending…' : 'Send to developer'}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
