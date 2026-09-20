@@ -42,7 +42,7 @@ export default function FeedbackDialog() {
       toast({ title: 'Could not send', description: error.message, variant: 'destructive' });
       return;
     }
-    toast({ title: 'Thank you', description: 'Your message has been sent.' });
+    toast({ title: 'Thank you', description: 'Your message has been sent to the developer.' });
     setMessage(''); setName(''); setEmail(''); setType('general');
     setOpen(false);
   };
@@ -50,15 +50,16 @@ export default function FeedbackDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button className="p-1.5 rounded-md hover:bg-muted text-muted-foreground" title="Send feedback">
+        <button className="p-1.5 rounded-md hover:bg-muted text-muted-foreground" title="Message the developer">
           <MessageSquarePlus className="w-4 h-4" />
         </button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Send feedback</DialogTitle>
+          <DialogTitle>Message the developer</DialogTitle>
           <DialogDescription>
-            Report a fault, request a change, or share an opinion. It goes straight to the team.
+            Trying out StratedgeOS? Send your improvement suggestions, fault reports or change requests
+            directly to the developer, Walter C. Every message is read.
           </DialogDescription>
         </DialogHeader>
 
@@ -93,7 +94,7 @@ export default function FeedbackDialog() {
 
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-          <Button onClick={submit} disabled={saving}>{saving ? 'Sending…' : 'Send'}</Button>
+          <Button onClick={submit} disabled={saving}>{saving ? 'Sending…' : 'Send to developer'}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
