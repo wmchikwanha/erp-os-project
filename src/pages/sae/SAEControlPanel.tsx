@@ -25,6 +25,10 @@ export default function SAEControlPanel() {
   const [newRate, setNewRate] = useState({ currency: 'USD', official_rate: 1, parallel_rate: 1, source: 'manual' });
   const [newTax, setNewTax] = useState({ name: '', authority: 'ZIMRA', amount: 0, currency: 'USD', due_date: '' });
   const [newOutage, setNewOutage] = useState({ zone: 'Zone A', start_time: '', end_time: '', source: 'ZESA' });
+  const [regionId, setRegionId] = useState(ZESA_REGIONS[0].id);
+  const [areaCode, setAreaCode] = useState(ZESA_REGIONS[0].areas[0].code);
+  const [pasted, setPasted] = useState('');
+  const region = ZESA_REGIONS.find((r) => r.id === regionId)!;
 
   const reload = async () => {
     const [{ data: r }, { data: t }, { data: o }] = await Promise.all([
