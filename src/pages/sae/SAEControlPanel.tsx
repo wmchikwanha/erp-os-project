@@ -98,16 +98,60 @@ export default function SAEControlPanel() {
         <CardHeader><CardTitle className="text-sm">ZESA Load-Shedding Schedule</CardTitle></CardHeader>
         <CardContent className="space-y-3">
           <p className="text-[11px] text-muted-foreground">
-            Add each outage window. The Load-Shedding Planner matches these against shifts and power-sensitive equipment.
+            Load the published ZETDC timetable for your area, paste the latest published schedule, or add single windows.
+            The Load-Shedding Planner matches these against shifts and power-sensitive equipment.
           </p>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-            <Input value={newOutage.zone} onChange={(e) => setNewOutage({ ...newOutage, zone: e.target.value })} placeholder="Zone / suburb" />
-            <Input type="datetime-local" value={newOutage.start_time} onChange={(e) => setNewOutage({ ...newOutage, start_time: e.target.value })} />
-            <Input type="datetime-local" value={newOutage.end_time} onChange={(e) => setNewOutage({ ...newOutage, end_time: e.target.value })} />
-            <Input value={newOutage.source} onChange={(e) => setNewOutage({ ...newOutage, source: e.target.value })} placeholder="Source" />
-            <div className="flex gap-2">
+
+          <div className="rounded-md border border-border p-3 space-y-2">
+            <p className="text-xs font-medium">1 · Load the published timetable</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+              <select
+                className="h-9 rounded-md border border-input bg-background px-2 text-xs"
+                value={regionId}
+                onChange={(e) => {
+                  const r = ZESA_REGIONS.find((x) => x.id === e.target.value)!;
+                  setRegionId(r.id);
+                  setAreaCode(r.areas[0].code);
+                }}
+              >
+                {ZESA_REGIONS.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
+              </select>
+              <select
+                className="h-9 rounded-md border border-input bg-background px-2 text-xs"
+                value={areaCode}
+                onChange={(e) => setAreaCode(e.target.value)}
+              >
+                {region.areas.map((a) => <option key={a.code} value={a.code}>{a.code} · {a.name}</option>)}
+              </select>
+              <Button onClick={applyTimetable} size="sm">Load next 7 days</Button>
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              Peak periods follow ZETDC's published programme: 08:00–11:00 morning and 17:00–21:00 evening, rotating by area group.
+            </p>
+          </div>
+
+          <div className="rounded-md border border-border p-3 space-y-2">
+            <p className="text-xs font-medium">2 · Paste ZESA's latest published schedule</p>
+            <Textarea
+              rows={4}
+              value={pasted}
+              onChange={(e) => setPasted(e.target.value)}
+              placeholder={'Borrowdale  2026-09-22  08:00-11:00\nH12 Monday 17:00 - 21:00'}
+              className="text-xs font-mono"
+            />
+            <div className="flex justify-end">
+              <Button onClick={importPasted} size="sm" variant="outline" disabled={!pasted.trim()}>Import schedule</Button>
+            </div>
+          </div>
+
+          <div className="rounded-md border border-border p-3 space-y-2">
+            <p className="text-xs font-medium">3 · Add a one-off window</p>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+              <Input value={newOutage.zone} onChange={(e) => setNewOutage({ ...newOutage, zone: e.target.value })} placeholder="Zone / suburb" />
+              <Input type="datetime-local" value={newOutage.start_time} onChange={(e) => setNewOutage({ ...newOutage, start_time: e.target.value })} />
+              <Input type="datetime-local" value={newOutage.end_time} onChange={(e) => setNewOutage({ ...newOutage, end_time: e.target.value })} />
+              <Input value={newOutage.source} onChange={(e) => setNewOutage({ ...newOutage, source: e.target.value })} placeholder="Source" />
               <Button onClick={addOutage} size="sm">Add window</Button>
-              <Button onClick={addTypicalWeek} size="sm" variant="outline">Typical week</Button>
             </div>
           </div>
           {outages.length === 0 ? (
