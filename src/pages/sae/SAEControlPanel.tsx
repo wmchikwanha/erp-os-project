@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Trash2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { NumberInput } from '@/components/ui/number-input';
+import { Textarea } from '@/components/ui/textarea';
+import { ZESA_REGIONS, generateFromTimetable, parsePastedSchedule } from '@/data/zesaSchedule';
 
 interface Rate { id: string; currency: string; official_rate: number; parallel_rate: number; effective_date: string; source: string | null }
 interface Tax { id: string; name: string; authority: string; amount: number; currency: string; due_date: string; status: string }
@@ -23,6 +25,10 @@ export default function SAEControlPanel() {
   const [newRate, setNewRate] = useState({ currency: 'USD', official_rate: 1, parallel_rate: 1, source: 'manual' });
   const [newTax, setNewTax] = useState({ name: '', authority: 'ZIMRA', amount: 0, currency: 'USD', due_date: '' });
   const [newOutage, setNewOutage] = useState({ zone: 'Zone A', start_time: '', end_time: '', source: 'ZESA' });
+  const [regionId, setRegionId] = useState(ZESA_REGIONS[0].id);
+  const [areaCode, setAreaCode] = useState(ZESA_REGIONS[0].areas[0].code);
+  const [pasted, setPasted] = useState('');
+  const region = ZESA_REGIONS.find((r) => r.id === regionId)!;
 
   const reload = async () => {
     const [{ data: r }, { data: t }, { data: o }] = await Promise.all([
@@ -67,24 +73,19 @@ export default function SAEControlPanel() {
     reload();
   };
 
-  const addTypicalWeek = async () => {
-    const rows: { zone: string; start_time: string; end_time: string; source: string }[] = [];
-    const base = new Date();
-    base.setHours(0, 0, 0, 0);
-    for (let d = 0; d < 7; d++) {
-      const day = new Date(base.getTime() + d * 86400000);
-      const morning = new Date(day); morning.setHours(5, 0, 0, 0);
-      const mEnd = new Date(day); mEnd.setHours(9, 0, 0, 0);
-      const evening = new Date(day); evening.setHours(17, 0, 0, 0);
-      const eEnd = new Date(day); eEnd.setHours(21, 0, 0, 0);
-      rows.push({ zone: newOutage.zone, start_time: morning.toISOString(), end_time: mEnd.toISOString(), source: 'ZESA (typical week)' });
-      rows.push({ zone: newOutage.zone, start_time: evening.toISOString(), end_time: eEnd.toISOString(), source: 'ZESA (typical week)' });
-    }
+  const insertWindows = async (rows: { zone: string; start_time: string; end_time: string; source: string }[], label: string) => {
+    if (!rows.length) return toast({ title: 'Nothing to import', description: 'No outage windows were found.', variant: 'destructive' });
     const { error } = await supabase.from('load_shedding_schedule').insert(rows);
     if (error) return toast({ title: 'Could not save', description: error.message, variant: 'destructive' });
-    toast({ title: 'Typical 7-day schedule added', description: `${rows.length} windows for ${newOutage.zone}` });
+    toast({ title: label, description: `${rows.length} window(s) loaded` });
     reload();
   };
+
+  const applyTimetable = () =>
+    insertWindows(generateFromTimetable(regionId, areaCode), 'Published timetable loaded');
+
+  const importPasted = () =>
+    insertWindows(parsePastedSchedule(pasted, newOutage.zone), 'Schedule imported').then(() => setPasted(''));
 
   return (
     <div className="space-y-6 max-w-5xl">
@@ -97,16 +98,60 @@ export default function SAEControlPanel() {
         <CardHeader><CardTitle className="text-sm">ZESA Load-Shedding Schedule</CardTitle></CardHeader>
         <CardContent className="space-y-3">
           <p className="text-[11px] text-muted-foreground">
-            Add each outage window. The Load-Shedding Planner matches these against shifts and power-sensitive equipment.
+            Load the published ZETDC timetable for your area, paste the latest published schedule, or add single windows.
+            The Load-Shedding Planner matches these against shifts and power-sensitive equipment.
           </p>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-            <Input value={newOutage.zone} onChange={(e) => setNewOutage({ ...newOutage, zone: e.target.value })} placeholder="Zone / suburb" />
-            <Input type="datetime-local" value={newOutage.start_time} onChange={(e) => setNewOutage({ ...newOutage, start_time: e.target.value })} />
-            <Input type="datetime-local" value={newOutage.end_time} onChange={(e) => setNewOutage({ ...newOutage, end_time: e.target.value })} />
-            <Input value={newOutage.source} onChange={(e) => setNewOutage({ ...newOutage, source: e.target.value })} placeholder="Source" />
-            <div className="flex gap-2">
+
+          <div className="rounded-md border border-border p-3 space-y-2">
+            <p className="text-xs font-medium">1 · Load the published timetable</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+              <select
+                className="h-9 rounded-md border border-input bg-background px-2 text-xs"
+                value={regionId}
+                onChange={(e) => {
+                  const r = ZESA_REGIONS.find((x) => x.id === e.target.value)!;
+                  setRegionId(r.id);
+                  setAreaCode(r.areas[0].code);
+                }}
+              >
+                {ZESA_REGIONS.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
+              </select>
+              <select
+                className="h-9 rounded-md border border-input bg-background px-2 text-xs"
+                value={areaCode}
+                onChange={(e) => setAreaCode(e.target.value)}
+              >
+                {region.areas.map((a) => <option key={a.code} value={a.code}>{a.code} · {a.name}</option>)}
+              </select>
+              <Button onClick={applyTimetable} size="sm">Load next 7 days</Button>
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              Peak periods follow ZETDC's published programme: 08:00–11:00 morning and 17:00–21:00 evening, rotating by area group.
+            </p>
+          </div>
+
+          <div className="rounded-md border border-border p-3 space-y-2">
+            <p className="text-xs font-medium">2 · Paste ZESA's latest published schedule</p>
+            <Textarea
+              rows={4}
+              value={pasted}
+              onChange={(e) => setPasted(e.target.value)}
+              placeholder={'Borrowdale  2026-09-22  08:00-11:00\nH12 Monday 17:00 - 21:00'}
+              className="text-xs font-mono"
+            />
+            <div className="flex justify-end">
+              <Button onClick={importPasted} size="sm" variant="outline" disabled={!pasted.trim()}>Import schedule</Button>
+            </div>
+          </div>
+
+          <div className="rounded-md border border-border p-3 space-y-2">
+            <p className="text-xs font-medium">3 · Add a one-off window</p>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+              <Input value={newOutage.zone} onChange={(e) => setNewOutage({ ...newOutage, zone: e.target.value })} placeholder="Zone / suburb" />
+              <Input type="datetime-local" value={newOutage.start_time} onChange={(e) => setNewOutage({ ...newOutage, start_time: e.target.value })} />
+              <Input type="datetime-local" value={newOutage.end_time} onChange={(e) => setNewOutage({ ...newOutage, end_time: e.target.value })} />
+              <Input value={newOutage.source} onChange={(e) => setNewOutage({ ...newOutage, source: e.target.value })} placeholder="Source" />
               <Button onClick={addOutage} size="sm">Add window</Button>
-              <Button onClick={addTypicalWeek} size="sm" variant="outline">Typical week</Button>
             </div>
           </div>
           {outages.length === 0 ? (
