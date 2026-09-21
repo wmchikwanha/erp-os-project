@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Trash2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { NumberInput } from '@/components/ui/number-input';
+import { Textarea } from '@/components/ui/textarea';
+import { ZESA_REGIONS, generateFromTimetable, parsePastedSchedule } from '@/data/zesaSchedule';
 
 interface Rate { id: string; currency: string; official_rate: number; parallel_rate: number; effective_date: string; source: string | null }
 interface Tax { id: string; name: string; authority: string; amount: number; currency: string; due_date: string; status: string }
