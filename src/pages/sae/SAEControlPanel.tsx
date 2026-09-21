@@ -73,24 +73,19 @@ export default function SAEControlPanel() {
     reload();
   };
 
-  const addTypicalWeek = async () => {
-    const rows: { zone: string; start_time: string; end_time: string; source: string }[] = [];
-    const base = new Date();
-    base.setHours(0, 0, 0, 0);
-    for (let d = 0; d < 7; d++) {
-      const day = new Date(base.getTime() + d * 86400000);
-      const morning = new Date(day); morning.setHours(5, 0, 0, 0);
-      const mEnd = new Date(day); mEnd.setHours(9, 0, 0, 0);
-      const evening = new Date(day); evening.setHours(17, 0, 0, 0);
-      const eEnd = new Date(day); eEnd.setHours(21, 0, 0, 0);
-      rows.push({ zone: newOutage.zone, start_time: morning.toISOString(), end_time: mEnd.toISOString(), source: 'ZESA (typical week)' });
-      rows.push({ zone: newOutage.zone, start_time: evening.toISOString(), end_time: eEnd.toISOString(), source: 'ZESA (typical week)' });
-    }
+  const insertWindows = async (rows: { zone: string; start_time: string; end_time: string; source: string }[], label: string) => {
+    if (!rows.length) return toast({ title: 'Nothing to import', description: 'No outage windows were found.', variant: 'destructive' });
     const { error } = await supabase.from('load_shedding_schedule').insert(rows);
     if (error) return toast({ title: 'Could not save', description: error.message, variant: 'destructive' });
-    toast({ title: 'Typical 7-day schedule added', description: `${rows.length} windows for ${newOutage.zone}` });
+    toast({ title: label, description: `${rows.length} window(s) loaded` });
     reload();
   };
+
+  const applyTimetable = () =>
+    insertWindows(generateFromTimetable(regionId, areaCode), 'Published timetable loaded');
+
+  const importPasted = () =>
+    insertWindows(parsePastedSchedule(pasted, newOutage.zone), 'Schedule imported').then(() => setPasted(''));
 
   return (
     <div className="space-y-6 max-w-5xl">
