@@ -157,6 +157,59 @@ export type Database = {
           },
         ]
       }
+      budget_lines: {
+        Row: {
+          category: string
+          created_at: string
+          currency: string
+          id: string
+          kind: string
+          label: string | null
+          notes: string | null
+          period: string
+          planned_amount: number
+          project_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          currency?: string
+          id?: string
+          kind?: string
+          label?: string | null
+          notes?: string | null
+          period: string
+          planned_amount?: number
+          project_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          kind?: string
+          label?: string | null
+          notes?: string | null
+          period?: string
+          planned_amount?: number
+          project_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_lines_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       candidates: {
         Row: {
           applied_date: string
