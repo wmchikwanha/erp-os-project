@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useLoadSheddingPlanner, type LoadShedRec } from '@/hooks/useLoadSheddingPlanner';
 import RationaleCard from '@/components/sae/RationaleCard';
 import CreateActionPlanDialog from '@/components/sae/CreateActionPlanDialog';
@@ -43,9 +44,14 @@ export default function LoadSheddingPlanner() {
             Next 7 days of outage exposure mapped against your shift &amp; equipment plan. Updated {new Date(data.generated_at).toLocaleString()}.
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => setRulesOpen(true)}>
-          <Settings2 className="w-3.5 h-3.5 mr-1.5" /> Collision rules
-        </Button>
+        <div className="flex gap-2">
+          <Button asChild variant="outline" size="sm">
+            <Link to="/sae/zesa-timetable">ZESA timetable</Link>
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setRulesOpen(true)}>
+            <Settings2 className="w-3.5 h-3.5 mr-1.5" /> Collision rules
+          </Button>
+        </div>
       </header>
 
       {data.rules && (
@@ -93,7 +99,7 @@ export default function LoadSheddingPlanner() {
             </ResponsiveContainer>
           ) : (
             <div className="h-full flex items-center justify-center text-sm text-muted-foreground">
-              No outage windows logged. Add this week's ZESA schedule in SAE Control to activate the planner.
+              No outage windows logged. <Link to="/sae/zesa-timetable" className="underline ml-1">Paste ZESA's published schedule</Link> to activate the planner.
             </div>
           )}
         </CardContent>

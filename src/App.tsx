@@ -35,6 +35,7 @@ import ProcurementScout from "./pages/sae/ProcurementScout";
 import ComplianceMonitor from "./pages/sae/ComplianceMonitor";
 import LoadSheddingPlanner from "./pages/sae/LoadSheddingPlanner";
 import SAEAuditLog from "./pages/sae/SAEAuditLog";
+import ZesaTimetable from "./pages/sae/ZesaTimetable";
 import ApprovalSettings from "./pages/settings/ApprovalSettings";
 import FeedbackInbox from "./pages/settings/FeedbackInbox";
 
@@ -50,6 +51,7 @@ const DEPT_ROUTE_MAP: Record<string, { path: string; element: React.ReactNode }[
     { path: '/consumption', element: <Consumption /> },
     { path: '/sae/procurement', element: <ProcurementScout /> },
     { path: '/sae/operations', element: <LoadSheddingPlanner /> },
+    { path: '/sae/zesa-timetable', element: <ZesaTimetable /> },
     { path: '/sae/audit', element: <SAEAuditLog /> },
   ],
   hr_manager: [
@@ -63,6 +65,7 @@ const DEPT_ROUTE_MAP: Record<string, { path: string; element: React.ReactNode }[
     { path: '/scheduling', element: <Scheduling /> },
     { path: '/timesheets', element: <Timesheets /> },
     { path: '/sae/operations', element: <LoadSheddingPlanner /> },
+    { path: '/sae/zesa-timetable', element: <ZesaTimetable /> },
     { path: '/sae/audit', element: <SAEAuditLog /> },
   ],
   finance_manager: [
@@ -144,6 +147,7 @@ function ProtectedRoutes() {
         <Route path="/sae/procurement" element={<ProcurementScout />} />
         <Route path="/sae/compliance" element={<ComplianceMonitor />} />
         <Route path="/sae/operations" element={<LoadSheddingPlanner />} />
+        <Route path="/sae/zesa-timetable" element={<ZesaTimetable />} />
         <Route path="/sae/control" element={<SAEControlPanel />} />
         <Route path="/sae/audit" element={<SAEAuditLog />} />
         <Route path="/settings/approvals" element={<ApprovalSettings />} />
