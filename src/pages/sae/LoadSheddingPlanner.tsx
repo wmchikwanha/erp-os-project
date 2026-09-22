@@ -43,9 +43,14 @@ export default function LoadSheddingPlanner() {
             Next 7 days of outage exposure mapped against your shift &amp; equipment plan. Updated {new Date(data.generated_at).toLocaleString()}.
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => setRulesOpen(true)}>
-          <Settings2 className="w-3.5 h-3.5 mr-1.5" /> Collision rules
-        </Button>
+        <div className="flex gap-2">
+          <Button asChild variant="outline" size="sm">
+            <Link to="/sae/zesa-timetable">ZESA timetable</Link>
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setRulesOpen(true)}>
+            <Settings2 className="w-3.5 h-3.5 mr-1.5" /> Collision rules
+          </Button>
+        </div>
       </header>
 
       {data.rules && (
