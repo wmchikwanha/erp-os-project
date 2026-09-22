@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useLoadSheddingPlanner, type LoadShedRec } from '@/hooks/useLoadSheddingPlanner';
 import RationaleCard from '@/components/sae/RationaleCard';
 import CreateActionPlanDialog from '@/components/sae/CreateActionPlanDialog';
@@ -98,7 +99,7 @@ export default function LoadSheddingPlanner() {
             </ResponsiveContainer>
           ) : (
             <div className="h-full flex items-center justify-center text-sm text-muted-foreground">
-              No outage windows logged. Add this week's ZESA schedule in SAE Control to activate the planner.
+              No outage windows logged. <Link to="/sae/zesa-timetable" className="underline ml-1">Paste ZESA's published schedule</Link> to activate the planner.
             </div>
           )}
         </CardContent>
